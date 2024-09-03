@@ -1,12 +1,35 @@
+import re
+
+
 class Medicine:
     """
     Класс для представления лекарства.
     """
     def __init__(self, name) -> None:
-        self.name = name
+        self.name = self.validate_name(name)
 
     def __str__(self) -> str:
         return self.name
+
+    @staticmethod
+    def validate_name(name: str) -> str:
+        """
+        Проверка валидности названия лекарства.
+        """
+        if not isinstance(name, str):
+            raise TypeError(
+                f'Передана не строка. arg: {name} - type: {type(name).__name__}.'
+            )
+        
+        validated_name = name.strip().lower()
+
+        if not validated_name:
+            raise ValueError('Название не может быть пустым или состоять только из пробелов.')
+
+        if not re.match(r'^[a-zA-Zа-яА-яёЁ0-9 ]+$', validated_name):
+            raise ValueError('Название может содержать только буквы, цифры и пробелы.')
+
+        return validated_name
 
 
 class MedicineManager:
