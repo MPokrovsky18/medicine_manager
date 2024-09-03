@@ -1,42 +1,41 @@
 import unittest
 
-from main import (
-    add_medicine,
-    remove_medicine,
-    edit_medicine,
-    get_medicines_list,
-    Medicine
-)
+from main import Medicine, MedicineManager
 
 
 class TestMedicineApp(unittest.TestCase):
     def test_add_medicine(self):
-        medicines = []
+        manager = MedicineManager()
         medicine = Medicine('placebo')
-        add_medicine(medicine, medicine_list=medicines)
 
-        self.assertEqual(len(medicines), 1)
-        self.assertEqual(medicines[0].name, medicine.name)
+        manager.add_medicine(medicine)
 
+        self.assertEqual(len(manager.medicines), 1)
+        self.assertEqual(manager.medicines[0].name, medicine.name)
 
     def test_remove_medicine(self):
-        medicines = [Medicine('placebo')]
-        remove_medicine(0, medicine_list=medicines)
-        self.assertEqual(len(medicines), 0)
+        manager = MedicineManager()
+        manager.medicines = [Medicine('placebo')]
+
+        manager.remove_medicine(0)
+
+        self.assertEqual(len(manager.medicines), 0)
 
     def test_edit_medicine(self):
-        medicines = [Medicine('placebo')]
+        manager = MedicineManager()
+        manager.medicines = [Medicine('placebo')]
         new_name = 'not placebo'
-        edit_medicine(0, new_name, medicine_list=medicines)
+        manager.edit_medicine(0, new_name)
 
-        self.assertEqual(len(medicines), 1)
-        self.assertEqual(medicines[0].name, new_name)
+        self.assertEqual(len(manager.medicines), 1)
+        self.assertEqual(manager.medicines[0].name, new_name)
 
     def test_get_medicines_list(self):
-        medicines = [Medicine('placebo'), Medicine('not placebo')]
-        medicines_str = f'0. {medicines[0].name}\n1. {medicines[1].name}'
+        manager = MedicineManager()
+        manager.medicines = [Medicine('placebo'), Medicine('not placebo')]
+        medicines_str = f'0. {manager.medicines[0].name}\n1. {manager.medicines[1].name}'
 
-        self.assertEqual(get_medicines_list(medicine_list=medicines), medicines_str)
+        self.assertEqual(manager.get_medicines_list(), medicines_str)
 
 
 if __name__ == '__main__':
