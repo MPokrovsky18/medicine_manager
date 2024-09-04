@@ -24,48 +24,43 @@ def console_app() -> None:
         show_menu()
         user_input = input('Выберите пункт меню: ')
         print('\n------------------\n')
+        
+        try:
+            if user_input == '1':
+                print(manager.get_medicines_list())
+            elif user_input == '2':
+                new_medicine_name = input('Введите название лекарства: ')
 
-        if user_input == '1':
-            print(manager.get_medicines_list())
-        elif user_input == '2':
-            new_medicine_name = input('Введите название лекарства: ')
+                if new_medicine_name:
+                    manager.add_medicine(new_medicine_name)
+                    print('Лекарство добавлено!')
+                else:
+                    print('Некорректный ввод!')
+            elif user_input == '3':
+                print(manager.get_medicines_list())
+                target_medicine_name = input('Введите название лекарства: ')
+                new_medicine_name = input('Новое название лекарства: ')
 
-            if new_medicine_name:
-                manager.add_medicine(Medicine(new_medicine_name.lower()))
-                print('Лекарство добавлено!')
-            else:
-                print('Некорректный ввод!')
-        elif user_input == '3':
-            print(manager.get_medicines_list())
-            target_medicine_id = input('Введите номер лекарства: ')
-            new_medicine_name = input('Введите название лекарства: ')
-
-            if target_medicine_id.isdigit() and new_medicine_name:
-                is_edit = manager.edit_medicine(int(target_medicine_id), new_medicine_name.lower())
-
-                if is_edit:
+                if target_medicine_name and new_medicine_name:
+                    manager.edit_medicine(target_medicine_name, new_medicine_name)
                     print('Лекарство изменено!')
                 else:
-                    print(f'Лекарство под номером {target_medicine_id} не найдено.')
-            else:
-                print('Некорректный ввод!')
-        elif user_input == '4':
-            print(manager.get_medicines_list())
-            target_medicine_id = input('Введите номер лекарства: ')
+                    print('Некорректный ввод!')
+            elif user_input == '4':
+                print(manager.get_medicines_list())
+                target_medicine_name = input('Введите название лекарства: ')
 
-            if target_medicine_id.isdigit():
-                is_delete = manager.remove_medicine(int(target_medicine_id))
-
-                if is_delete:
+                if target_medicine_name:
+                    manager.remove_medicine(target_medicine_name)
                     print('Лекарство удалено!')
                 else:
-                    print(f'Лекарство под номером {target_medicine_id} не найдено.')
+                    print('Некорректный ввод!')
+            elif user_input == '0':
+                is_run = False
             else:
                 print('Некорректный ввод!')
-        elif user_input == '0':
-            is_run = False
-        else:
-            print('Некорректный ввод!')
+        except Exception as e:
+            print(e)
 
         print('\n------------------\n')
 

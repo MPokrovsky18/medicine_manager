@@ -1,39 +1,75 @@
 import unittest
 
-from medicine import Medicine, MedicineManager
+from medicine import MedicineManager
 
 
 class TestMedicineApp(unittest.TestCase):
+    def test_medicine_count(self):
+        manager = MedicineManager()
+        test_name_1 = 'placebo'
+        test_name_2 = 'not placebo'
+
+        self.assertEqual(manager.medicine_count, 0)
+
+        manager.add_medicine(test_name_1)
+        self.assertEqual(manager.medicine_count, 1)
+
+        manager.add_medicine(test_name_2)
+        self.assertEqual(manager.medicine_count, 2)
+    
+    def test_get_medicine(self):
+        manager = MedicineManager()
+        test_name_1 = 'placebo'
+        test_name_2 = 'not placebo'
+        test_name_3 = 'not medicine'
+        manager.add_medicine(test_name_1)
+        manager.add_medicine(test_name_2)
+
+        medicine_1 = manager.get_medicine(test_name_1)
+        medicine_2 = manager.get_medicine(test_name_2)
+        medicine_3 = manager.get_medicine(test_name_3)
+
+        self.assertEqual(manager.medicine_count, 2)
+        self.assertEqual(medicine_1.name, test_name_1)
+        self.assertEqual(medicine_2.name, test_name_2)
+        self.assertEqual(medicine_3, None)
+
+
     def test_add_medicine(self):
         manager = MedicineManager()
-        medicine = Medicine('placebo')
+        test_name = 'placebo'
 
-        manager.add_medicine(medicine)
+        manager.add_medicine(test_name)
 
-        self.assertEqual(len(manager.medicines), 1)
-        self.assertEqual(manager.medicines[0].name, medicine.name)
+        self.assertEqual(manager.medicine_count, 1)
+        self.assertEqual(manager.get_medicine(test_name).name, test_name)
 
     def test_remove_medicine(self):
         manager = MedicineManager()
-        manager.medicines = [Medicine('placebo')]
+        test_name = 'placebo'
+        manager.add_medicine(test_name)
 
-        manager.remove_medicine(0)
+        manager.remove_medicine(test_name)
 
-        self.assertEqual(len(manager.medicines), 0)
+        self.assertEqual(manager.medicine_count, 0)
 
     def test_edit_medicine(self):
         manager = MedicineManager()
-        manager.medicines = [Medicine('placebo')]
+        test_name = 'placebo'
         new_name = 'not placebo'
-        manager.edit_medicine(0, new_name)
+        manager.add_medicine(test_name)
+        manager.edit_medicine(test_name, new_name)
 
-        self.assertEqual(len(manager.medicines), 1)
-        self.assertEqual(manager.medicines[0].name, new_name)
+        self.assertEqual(manager.medicine_count, 1)
+        self.assertEqual(manager.get_medicine(new_name).name, new_name)
 
     def test_get_medicines_list(self):
         manager = MedicineManager()
-        manager.medicines = [Medicine('placebo'), Medicine('not placebo')]
-        medicines_str = f'0. {manager.medicines[0].name}\n1. {manager.medicines[1].name}'
+        test_name_1 = 'placebo'
+        test_name_2 = 'not placebo'
+        manager.add_medicine(test_name_1)
+        manager.add_medicine(test_name_2)
+        medicines_str = f'1. {test_name_1}\n2. {test_name_2}'
 
         self.assertEqual(manager.get_medicines_list(), medicines_str)
 

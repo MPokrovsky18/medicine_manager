@@ -1,15 +1,27 @@
 import re
 
 
+MIN_LENGTH_NAME = 3
+
+
 class Medicine:
     """
     Класс для представления лекарства.
     """
+
     def __init__(self, name) -> None:
-        self.name = self.validate_name(name)
+        self.name = name
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def name(self) -> str:
+        return self.__name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.__name = self.validate_name(value)
 
     @staticmethod
     def validate_name(name: str) -> str:
@@ -20,11 +32,14 @@ class Medicine:
             raise TypeError(
                 f'Передана не строка. arg: {name} - type: {type(name).__name__}.'
             )
-        
+
         validated_name = name.strip().lower()
 
         if not validated_name:
             raise ValueError('Название не может быть пустым или состоять только из пробелов.')
+        
+        if len(validated_name) < MIN_LENGTH_NAME:
+            raise ValueError(f'Название должно быть не менее {MIN_LENGTH_NAME} символов.')
 
         if not re.match(r'^[a-zA-Zа-яА-яёЁ0-9 ]+$', validated_name):
             raise ValueError('Название может содержать только буквы, цифры и пробелы.')
@@ -37,45 +52,68 @@ class MedicineManager:
     Класс-менеджер для управления лекарствами.
     """
     def __init__(self) -> None:
-        self.medicines: list[Medicine] = []
+        self.__medicines: list[Medicine] = []
 
-    def add_medicine(self, medicine: Medicine) -> bool:
+    @property
+    def medicine_count(self) -> int:
+        """
+        Длина списка лекарств.
+        """
+        return len(self.__medicines)
+
+    def get_medicine(self, name: str) -> Medicine | None:
+        """
+        Получить объект из списка, если он существует.
+        """
+        target_name = Medicine.validate_name(name)
+
+        for medicine in self.__medicines:
+            if medicine.name == target_name:
+                return medicine
+
+        return None
+
+    def add_medicine(self, name: str) -> None:
         """
         Добавить лекарство в список.
         """
-        if medicine:
-            self.medicines.append(medicine)
-            return True
+        if self.get_medicine(name):
+            raise ValueError('Это лекарство уже есть в списке.')
 
-        return False
+        self.__medicines.append(Medicine(name))
 
-    def remove_medicine(self, medicine_id: int) -> bool:
+    def remove_medicine(self, name: str) -> None:
         """
         Удалить лекарство из списка.
         """
-        if medicine_id >= 0 and medicine_id < len(self.medicines):
-            self.medicines.pop(medicine_id)
-            return True
+        target = self.get_medicine(name)
 
-        return False
+        if not target:
+            raise ValueError(f'Объект с таким именем не найден: {name}')
 
-    def edit_medicine(self, medicine_id: int, name: str) -> bool:
+        self.__medicines.remove(target)
+
+    def edit_medicine(self, current_name: str, new_name: str) -> None:
         """
         Редактировать лекарство.
         """
-        if name and medicine_id >= 0 and medicine_id < len(self.medicines):
-            self.medicines[medicine_id].name = name
-            return True
-        
-        return False
+        if self.get_medicine(new_name):
+            raise ValueError(f'Объект с таким именем уже существует: {new_name}')
+
+        medicine = self.get_medicine(current_name)
+
+        if not medicine:
+            raise ValueError(f'Объект с таким именем не найден: {current_name}')
+
+        medicine.name = new_name
 
     def get_medicines_list(self) -> str:
         """
         Получить список лекарств.
         """
-        if self.medicines:
+        if self.__medicines:
             return '\n'.join(
-                f'{index}. {medicine.name}' for index, medicine in enumerate(self.medicines)
+                f'{index+1}. {medicine.name}' for index, medicine in enumerate(self.__medicines)
             )
-        
+
         return 'Список пуст!'
