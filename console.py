@@ -3,20 +3,27 @@ from medicine import MedicineManager
 
 APP_NAME = 'Лекарственный менеджер'
 SPLIT_LINE = '------------------'
-MENU = (
-    ('S', 'Показать все лекарства'),
-    ('A', 'Добавить лекарство'),
-    ('E', 'Редактировать лекарство'),
-    ('D', 'Удалить лекарство'),
-    ('Q', 'Выйти из программы')
-)
+MENU_ORDER = 'S', 'A', 'E', 'D', 'Q'
 
 class ConsoleApp:
     """
     Представление консольного интерфейса.
     """
+
     def __init__(self) -> None:
-        self.__menu = '\n'.join(f' - {description} - {command}' for command, description in MENU)
+        self.__commands = {
+            'Q': ('Выйти из программы', self.quit),
+            'Й': ('Выйти из программы', self.quit),
+            'A': ('Добавить лекарство', self.add_medicine),
+            'Ф': ('Добавить лекарство', self.add_medicine),
+            'E': ('Редактировать лекарство', self.edit_medicine),
+            'У': ('Редактировать лекарство', self.edit_medicine),
+            'D': ('Удалить лекарство', self.remove_medicine),
+            'В': ('Удалить лекарство', self.remove_medicine),
+            'S': ('Показать все лекарства', self.show_medicines),
+            'Ы': ('Показать все лекарства', self.show_medicines),
+        }
+        self.__menu = '\n'.join(f' - {self.__commands[command][0]} - {command}' for command in MENU_ORDER)
         self.__manager = MedicineManager()
 
     def start(self):
@@ -27,6 +34,7 @@ class ConsoleApp:
         print(f'Добро пожаловать в приложение "{APP_NAME}"')
         print(SPLIT_LINE)
 
+        self.__is_run = True
         self.run()
 
         print('Программа завершена!')
@@ -45,7 +53,7 @@ class ConsoleApp:
         """
         user_input = input(question + '(y/n)(д/н): ').lower()
 
-        if user_input in ('y', 'д'):
+        if user_input in ('y', 'д', ''):
             method(*args)
             print('Операция выполнена!')
         else:
@@ -107,33 +115,32 @@ class ConsoleApp:
         Показать список лекарств."""
         print(self.__manager.get_medicines_list())
         print(SPLIT_LINE)
+    
+    def quit(self) -> None:
+        """
+        Завершить работу программы.
+        """
+        self.__is_run = False
 
     def run(self) -> None:
         """
         Запустить программу в консоли.
         """
-        is_run = True
-
-        while is_run:
+        while self.__is_run:
             self.show_menu()
             user_input = input('Введите команду: ').upper()
             print(SPLIT_LINE)
-            
-            try:
-                if user_input in ('S', 'Ы'):
-                    self.show_medicines()
-                elif user_input in ('A', 'Ф'):
-                    self.add_medicine()
-                elif user_input in ('E', 'У'):
-                    self.edit_medicine()
-                elif user_input in ('D', 'В'):
-                    self.remove_medicine()
-                elif user_input in ('Q', 'Й'):
-                    is_run = False
-                else:
-                    print('Некорректный ввод!')
-            except Exception as e:
-                print('\nОперация не выполнена!')
-                print(e)
+
+            command = self.__commands.get(user_input)
+
+            if command:
+                try:
+                    _, action = command
+                    action()
+                except Exception as e:
+                    print('\nОперация не выполнена!')
+                    print(e)
+            else:
+                print('Некорректный ввод!')
 
             print(SPLIT_LINE)
