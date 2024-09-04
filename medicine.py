@@ -51,6 +51,7 @@ class MedicineManager:
     """
     Класс-менеджер для управления лекарствами.
     """
+
     def __init__(self) -> None:
         self.__medicines: list[Medicine] = []
 

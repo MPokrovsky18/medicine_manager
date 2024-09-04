@@ -17,7 +17,7 @@ class TestMedicineApp(unittest.TestCase):
         manager.add_medicine(test_name_2)
         self.assertEqual(manager.medicine_count, 2)
     
-    def test_get_medicine(self):
+    def test_find_medicine(self):
         manager = MedicineManager()
         test_name_1 = 'placebo'
         test_name_2 = 'not placebo'
