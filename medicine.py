@@ -61,7 +61,7 @@ class MedicineManager:
         """
         return len(self.__medicines)
 
-    def get_medicine(self, name: str) -> Medicine | None:
+    def find_medicine(self, name: str) -> Medicine | None:
         """
         Получить объект из списка, если он существует.
         """
@@ -77,7 +77,7 @@ class MedicineManager:
         """
         Добавить лекарство в список.
         """
-        if self.get_medicine(name):
+        if self.find_medicine(name):
             raise ValueError('Это лекарство уже есть в списке.')
 
         self.__medicines.append(Medicine(name))
@@ -86,7 +86,7 @@ class MedicineManager:
         """
         Удалить лекарство из списка.
         """
-        target = self.get_medicine(name)
+        target = self.find_medicine(name)
 
         if not target:
             raise ValueError(f'Объект с таким именем не найден: {name}')
@@ -97,10 +97,10 @@ class MedicineManager:
         """
         Редактировать лекарство.
         """
-        if self.get_medicine(new_name):
+        if self.find_medicine(new_name):
             raise ValueError(f'Объект с таким именем уже существует: {new_name}')
 
-        medicine = self.get_medicine(current_name)
+        medicine = self.find_medicine(current_name)
 
         if not medicine:
             raise ValueError(f'Объект с таким именем не найден: {current_name}')

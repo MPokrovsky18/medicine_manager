@@ -25,9 +25,9 @@ class TestMedicineApp(unittest.TestCase):
         manager.add_medicine(test_name_1)
         manager.add_medicine(test_name_2)
 
-        medicine_1 = manager.get_medicine(test_name_1)
-        medicine_2 = manager.get_medicine(test_name_2)
-        medicine_3 = manager.get_medicine(test_name_3)
+        medicine_1 = manager.find_medicine(test_name_1)
+        medicine_2 = manager.find_medicine(test_name_2)
+        medicine_3 = manager.find_medicine(test_name_3)
 
         self.assertEqual(manager.medicine_count, 2)
         self.assertEqual(medicine_1.name, test_name_1)
@@ -42,7 +42,7 @@ class TestMedicineApp(unittest.TestCase):
         manager.add_medicine(test_name)
 
         self.assertEqual(manager.medicine_count, 1)
-        self.assertEqual(manager.get_medicine(test_name).name, test_name)
+        self.assertEqual(manager.find_medicine(test_name).name, test_name)
 
     def test_remove_medicine(self):
         manager = MedicineManager()
@@ -61,7 +61,7 @@ class TestMedicineApp(unittest.TestCase):
         manager.edit_medicine(test_name, new_name)
 
         self.assertEqual(manager.medicine_count, 1)
-        self.assertEqual(manager.get_medicine(new_name).name, new_name)
+        self.assertEqual(manager.find_medicine(new_name).name, new_name)
 
     def test_get_medicines_list(self):
         manager = MedicineManager()
