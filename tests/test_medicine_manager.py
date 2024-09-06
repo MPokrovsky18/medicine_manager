@@ -38,7 +38,7 @@ class TestMedicineManager(unittest.TestCase):
         )
 
     def setUp(self) -> None:
-        self.manager = MedicineManager()
+        self.empty_manager = MedicineManager()
         self.manager_1count = MedicineManager()
         self.manager_2count = MedicineManager()
 
@@ -50,7 +50,7 @@ class TestMedicineManager(unittest.TestCase):
         )
 
     def test_empty_medicine_manager_count(self) -> None:
-        self.assertEqual(self.manager.medicine_count, 0)
+        self.assertEqual(self.empty_manager.medicine_count, 0)
 
     def test_medicine_manager_count(self):
         test_data = (
@@ -67,7 +67,7 @@ class TestMedicineManager(unittest.TestCase):
 
     def test_find_medicine_in_empty_manager(self):
         self.assertEqual(
-            self.manager.find_medicine(self.medicine_name_1),
+            self.empty_manager.find_medicine(self.medicine_name_1),
             None,
             msg='При попытке получить объект из пустого списка, получен не None.'
         )
@@ -119,7 +119,7 @@ class TestMedicineManager(unittest.TestCase):
 
     def test_add_medicine(self):
         test_data = (
-            (self.medicine_name_1, self.manager),
+            (self.medicine_name_1, self.empty_manager),
             (self.medicine_name_2, self.manager_1count),
             (self.medicine_name_3, self.manager_2count),
         )
@@ -144,16 +144,16 @@ class TestMedicineManager(unittest.TestCase):
 
     def test_add_medicine_with_uncorrect_data(self):
         for name, error, msg in self.test_uncorrect_data:
-            start_count = len(self.manager._MedicineManager__medicines)
+            start_count = len(self.empty_manager._MedicineManager__medicines)
 
             with self.subTest(msg=msg):
                 with self.assertRaises(
                     error,
                     msg=f'Ожидалось исключение {error.__name__} для имени {name}.'
                 ):
-                    self.manager.add_medicine(name)
+                    self.empty_manager.add_medicine(name)
             
-            end_count = len(self.manager._MedicineManager__medicines)
+            end_count = len(self.empty_manager._MedicineManager__medicines)
             self.assertEqual(
                 end_count,
                 start_count,
@@ -204,16 +204,16 @@ class TestMedicineManager(unittest.TestCase):
 
     def test_remove_medicine_with_uncorrect_data(self):
         for name, error, msg in self.test_uncorrect_data:
-            start_count = len(self.manager._MedicineManager__medicines)
+            start_count = len(self.empty_manager._MedicineManager__medicines)
 
             with self.subTest(msg=msg):
                 with self.assertRaises(
                     error,
                     msg=f'Ожидалось исключение {error.__name__} для имени {name}.'
                 ):
-                    self.manager.remove_medicine(name)
+                    self.empty_manager.remove_medicine(name)
             
-            end_count = len(self.manager._MedicineManager__medicines)
+            end_count = len(self.empty_manager._MedicineManager__medicines)
 
             self.assertEqual(
                 end_count,
@@ -317,13 +317,22 @@ class TestMedicineManager(unittest.TestCase):
         )
 
     def test_get_medicines_list(self):
-        test_name_1 = 'placebo'
-        test_name_2 = 'not placebo'
-        self.manager.add_medicine(test_name_1)
-        self.manager.add_medicine(test_name_2)
-        medicines_str = f'1. {test_name_1}\n2. {test_name_2}'
+        medicines_str = f'1. {self.medicine_name_1}\n2. {self.medicine_name_2}'
 
-        self.assertEqual(self.manager.get_medicines_list(), medicines_str)
+        self.assertEqual(
+            self.manager_2count.get_medicines_list(),
+            medicines_str,
+            msg=f'Получение строки списка лекарств не соответствует шаблону.\nШаблон:\n{medicines_str}'
+        )
+    
+    def test_get_medicine_list_empty(self):
+        empty_medicines_str = 'Список пуст!'
+
+        self.assertEqual(
+            self.empty_manager.get_medicines_list(),
+            empty_medicines_str,
+            msg=f'Получение строки при пустом списке лекарств не соответствует шаблону.\nШаблон:\n{empty_medicines_str}'
+        )
 
 
 if __name__ == '__main__':
