@@ -113,6 +113,40 @@ class TestMedicineManager(unittest.TestCase):
                 ):
                     self.manager_2count.find_medicine(name)
 
+    def test_check_exist_medicine_or_rise(self):
+        test_data = (
+            (self.medicine_name_1, True, self.manager_1count.medicines[0]),
+            (self.medicine_name_2, False, None),
+        )
+
+        for name, exists, result in test_data:
+            with self.subTest(
+                f'Проверяем, существует ли объект с именем {name}.'
+            ):
+                medicine = self.manager_1count.check_exist_medicine_or_rise(name, exists=exists)
+
+                self.assertEqual(
+                    medicine,
+                    result,
+                    msg=f'Ожидалось, что объект {"существует" if result else "не существует"}.'
+                )
+
+    def test_check_exist_medicine_or_rise_with_exception(self):
+        test_data = (
+            (self.medicine_name_1, False),
+            (self.medicine_name_2, True)
+        )
+
+        for name, exists, in test_data:
+            with self.subTest(
+                f'Проверяем, что выбрасывается исключение {ValueError}.'
+            ):
+                with self.assertRaises(
+                    ValueError,
+                    msg=f'Ожидалось исключение {ValueError.__name__} для имени {name}.'
+                ):
+                    self.manager_1count.check_exist_medicine_or_rise(name, exists=exists)
+
     def test_add_medicine(self):
         test_data = (
             (self.medicine_name_1, self.empty_manager),

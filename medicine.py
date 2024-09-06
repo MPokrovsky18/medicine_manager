@@ -96,39 +96,41 @@ class MedicineManager:
                 return medicine
 
         return None
+    
+    def check_exist_medicine_or_rise(self, name: str, exists: bool = True) -> Medicine | None:
+        """
+        Проверить объект на существование или отсутствие в списке.
+        """
+        medicine = self.find_medicine(name)
+
+        if not medicine and exists:
+            raise ValueError(f'Объект с таким именем не найден: {name}')
+        
+        if medicine and not exists:
+            raise ValueError(f'Объект с таким именем уже существует: {name}')
+        
+        return medicine if exists else None
 
     def add_medicine(self, name: str) -> None:
         """
         Добавить лекарство в список.
         """
-        if self.find_medicine(name):
-            raise ValueError('Это лекарство уже есть в списке.')
-
+        self.check_exist_medicine_or_rise(name, exists=False)
         self.__medicines.append(Medicine(name))
 
     def remove_medicine(self, name: str) -> None:
         """
         Удалить лекарство из списка.
         """
-        target = self.find_medicine(name)
-
-        if not target:
-            raise ValueError(f'Объект с таким именем не найден: {name}')
-
+        target = self.check_exist_medicine_or_rise(name)
         self.__medicines.remove(target)
 
     def edit_medicine(self, current_name: str, new_name: str) -> None:
         """
         Редактировать лекарство.
         """
-        if self.find_medicine(new_name):
-            raise ValueError(f'Объект с таким именем уже существует: {new_name}')
-
-        medicine = self.find_medicine(current_name)
-
-        if not medicine:
-            raise ValueError(f'Объект с таким именем не найден: {current_name}')
-
+        medicine = self.check_exist_medicine_or_rise(current_name)
+        self.check_exist_medicine_or_rise(new_name, exists=False)
         medicine.name = new_name
 
     def get_medicines_list(self) -> str:
