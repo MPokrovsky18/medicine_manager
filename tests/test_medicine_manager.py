@@ -16,6 +16,7 @@ class TestMedicineManager(unittest.TestCase):
         cls.medicine_name_empty = ''
         cls.medicine_name_not_str = 1
         cls.medicine_name_short = 'ab'
+        cls.medicine_not_allowed_symbols = '.[]@medicine'
 
     def setUp(self) -> None:
         self.manager = MedicineManager()
@@ -90,23 +91,115 @@ class TestMedicineManager(unittest.TestCase):
     
     def test_find_medicine_with_uncorrect_data(self):
         test_data = (
-            (self.medicine_name_empty, ValueError, 'Пустое имя должно вызвать ValueError'),
-            (self.medicine_name_short, ValueError, 'Слишком короткое имя должно вызвать ValueError'),
-            (self.medicine_name_not_str, TypeError, 'Неверный тип данных должен вызвать TypeError')
+            (
+                self.medicine_name_empty, ValueError,
+                'Пустое имя должно вызвать ValueError'
+            ),
+            (
+                self.medicine_name_short, ValueError,
+                'Слишком короткое имя должно вызвать ValueError'
+            ),
+            (
+                self.medicine_name_not_str, TypeError,
+                'Неверный тип данных должен вызвать TypeError'
+            ),
+            (
+                self.medicine_not_allowed_symbols, ValueError,
+                'Имя с неразрешенными символами должно вызвать ValueError'
+            )
         )
 
         for name, error, msg in test_data:
             with self.subTest(msg=msg):
-                with self.assertRaises(error):
+                with self.assertRaises(
+                    error,
+                    msg=f'Ожидалось исключение {error.__name__} для имени {name}.'
+                ):
                     self.manager_2count.find_medicine(name)
 
     def test_add_medicine(self):
-        test_name = 'placebo'
+        test_data = (
+            (self.medicine_name_1, self.manager),
+            (self.medicine_name_2, self.manager_1count),
+            (self.medicine_name_3, self.manager_2count),
+        )
 
-        self.manager.add_medicine(test_name)
+        for name, manager in test_data:
+            with self.subTest(
+                f'Проверка добавления лекарства: {name}.'
+            ):
+                start_count = len(manager._MedicineManager__medicines)
+                manager.add_medicine(name)
+                end_count = len(manager._MedicineManager__medicines)
+                medicine = manager._MedicineManager__medicines[-1]
 
-        self.assertEqual(self.manager.medicine_count, 1)
-        self.assertEqual(self.manager.find_medicine(test_name).name, test_name)
+                self.assertEqual(
+                    end_count - start_count, 1,
+                    msg='Лекарство не было добавлено.'
+                )
+                self.assertEqual(
+                    medicine.name, name,
+                    msg=f'Ожидалось название {name}, но получено {medicine.name}.'
+                )
+
+    def test_add_medicine_with_uncorrect_data(self):
+        test_data = (
+            (
+                self.medicine_name_empty, ValueError,
+                'Пустое имя должно вызвать ValueError'
+            ),
+            (
+                self.medicine_name_short, ValueError,
+                'Слишком короткое имя должно вызвать ValueError'
+            ),
+            (
+                self.medicine_name_not_str, TypeError,
+                'Неверный тип данных должен вызвать TypeError'
+            ),
+            (
+                self.medicine_not_allowed_symbols, ValueError,
+                'Имя с неразрешенными символами должно вызвать ValueError'
+            )
+        )
+
+        for name, error, msg in test_data:
+            start_count = len(self.manager._MedicineManager__medicines)
+
+            with self.subTest(msg=msg):
+                with self.assertRaises(
+                    error,
+                    msg=f'Ожидалось исключение {error.__name__} для имени {name}.'
+                ):
+                    self.manager.add_medicine(name)
+            
+            end_count = len(self.manager._MedicineManager__medicines)
+            self.assertEqual(
+                end_count,
+                start_count,
+                msg='Количество лекарств не должно измениться при ошибке.'
+            )
+
+    def test_add_medicine_with_duplicate(self):
+        test_data = self.medicine_name_1, self.medicine_name_2
+
+        for name in test_data:
+            with self.subTest(
+                f'Проверка добавления дубликата для лекарства: {name}.'
+            ):
+                start_count = len(self.manager_2count._MedicineManager__medicines)
+                
+                with self.assertRaises(
+                    ValueError,
+                    msg=f'Ожидалось исключение ValueError для имени {name}.'
+                ):
+                    self.manager_2count.add_medicine(name)
+                
+                end_count = len(self.manager_2count._MedicineManager__medicines)
+                self.assertEqual(
+                    end_count,
+                    start_count,
+                    msg=f'Количество лекарств не должно измениться при добавлении дубликата {name}.'
+                )
 
     def test_remove_medicine(self):
         test_name = 'placebo'
