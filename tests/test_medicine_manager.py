@@ -39,15 +39,11 @@ class TestMedicineManager(unittest.TestCase):
 
     def setUp(self) -> None:
         self.empty_manager = MedicineManager()
-        self.manager_1count = MedicineManager()
-        self.manager_2count = MedicineManager()
-
-        self.manager_1count._MedicineManager__medicines.append(
-            Medicine(self.medicine_name_1)
-        )
-        self.manager_2count._MedicineManager__medicines.extend(
-            [Medicine(self.medicine_name_1), Medicine(self.medicine_name_2)]
-        )
+        self.manager_1count = MedicineManager(Medicine(self.medicine_name_1))
+        self.manager_2count = MedicineManager([
+            Medicine(self.medicine_name_1),
+            Medicine(self.medicine_name_2)
+        ])
 
     def test_empty_medicine_manager_count(self) -> None:
         self.assertEqual(self.empty_manager.medicine_count, 0)
@@ -128,10 +124,10 @@ class TestMedicineManager(unittest.TestCase):
             with self.subTest(
                 f'Проверка добавления лекарства: {name}.'
             ):
-                start_count = len(manager._MedicineManager__medicines)
+                start_count = len(manager.medicines)
                 manager.add_medicine(name)
-                end_count = len(manager._MedicineManager__medicines)
-                medicine = manager._MedicineManager__medicines[-1]
+                end_count = len(manager.medicines)
+                medicine = manager.medicines[-1]
 
                 self.assertEqual(
                     end_count - start_count, 1,
@@ -144,7 +140,7 @@ class TestMedicineManager(unittest.TestCase):
 
     def test_add_medicine_with_uncorrect_data(self):
         for name, error, msg in self.test_uncorrect_data:
-            start_count = len(self.empty_manager._MedicineManager__medicines)
+            start_count = len(self.empty_manager.medicines)
 
             with self.subTest(msg=msg):
                 with self.assertRaises(
@@ -153,7 +149,7 @@ class TestMedicineManager(unittest.TestCase):
                 ):
                     self.empty_manager.add_medicine(name)
             
-            end_count = len(self.empty_manager._MedicineManager__medicines)
+            end_count = len(self.empty_manager.medicines)
             self.assertEqual(
                 end_count,
                 start_count,
@@ -167,7 +163,7 @@ class TestMedicineManager(unittest.TestCase):
             with self.subTest(
                 f'Проверка добавления дубликата для лекарства: {name}.'
             ):
-                start_count = len(self.manager_2count._MedicineManager__medicines)
+                start_count = len(self.manager_2count.medicines)
                 
                 with self.assertRaises(
                     ValueError,
@@ -175,7 +171,7 @@ class TestMedicineManager(unittest.TestCase):
                 ):
                     self.manager_2count.add_medicine(name)
                 
-                end_count = len(self.manager_2count._MedicineManager__medicines)
+                end_count = len(self.manager_2count.medicines)
                 self.assertEqual(
                     end_count,
                     start_count,
@@ -192,9 +188,9 @@ class TestMedicineManager(unittest.TestCase):
             with self.subTest(
                 f'Проверка удаления лекарства: {name}.'
             ):
-                start_count = len(self.manager_2count._MedicineManager__medicines)
+                start_count = len(self.manager_2count.medicines)
                 self.manager_2count.remove_medicine(name)
-                end_count = len(self.manager_2count._MedicineManager__medicines)
+                end_count = len(self.manager_2count.medicines)
 
                 self.assertEqual(
                     start_count - end_count, 1,
@@ -204,7 +200,7 @@ class TestMedicineManager(unittest.TestCase):
 
     def test_remove_medicine_with_uncorrect_data(self):
         for name, error, msg in self.test_uncorrect_data:
-            start_count = len(self.empty_manager._MedicineManager__medicines)
+            start_count = len(self.empty_manager.medicines)
 
             with self.subTest(msg=msg):
                 with self.assertRaises(
@@ -213,7 +209,7 @@ class TestMedicineManager(unittest.TestCase):
                 ):
                     self.empty_manager.remove_medicine(name)
             
-            end_count = len(self.empty_manager._MedicineManager__medicines)
+            end_count = len(self.empty_manager.medicines)
 
             self.assertEqual(
                 end_count,
@@ -222,7 +218,7 @@ class TestMedicineManager(unittest.TestCase):
             )
 
     def test_remove_medicine_non_exist(self):
-        start_count = len(self.manager_2count._MedicineManager__medicines)
+        start_count = len(self.manager_2count.medicines)
         
         with self.assertRaises(
             ValueError,
@@ -230,7 +226,7 @@ class TestMedicineManager(unittest.TestCase):
         ):
             self.manager_2count.remove_medicine(self.medicine_name_3)
         
-        end_count = len(self.manager_2count._MedicineManager__medicines)
+        end_count = len(self.manager_2count.medicines)
 
         self.assertEqual(
             end_count,
@@ -239,10 +235,10 @@ class TestMedicineManager(unittest.TestCase):
         )
 
     def test_edit_medicine(self):
-        start_count = len(self.manager_1count._MedicineManager__medicines)
+        start_count = len(self.manager_1count.medicines)
         self.manager_1count.edit_medicine(self.medicine_name_1, self.medicine_name_2)
-        end_count = len(self.manager_1count._MedicineManager__medicines)
-        medicine = self.manager_1count._MedicineManager__medicines[-1]
+        end_count = len(self.manager_1count.medicines)
+        medicine = self.manager_1count.medicines[-1]
 
         self.assertEqual(
             medicine.name, self.medicine_name_2,
@@ -256,7 +252,7 @@ class TestMedicineManager(unittest.TestCase):
 
     def test_edit_medicine_with_uncorrect_data(self):
         for new_name, error, msg in self.test_uncorrect_data:
-            start_count = len(self.manager_2count._MedicineManager__medicines)
+            start_count = len(self.manager_2count.medicines)
 
             with self.subTest(msg=msg):
                 with self.assertRaises(
@@ -265,7 +261,7 @@ class TestMedicineManager(unittest.TestCase):
                 ):
                     self.manager_2count.edit_medicine(self.medicine_name_1, new_name)
             
-            end_count = len(self.manager_2count._MedicineManager__medicines)
+            end_count = len(self.manager_2count.medicines)
 
             self.assertEqual(
                 end_count,
@@ -283,7 +279,7 @@ class TestMedicineManager(unittest.TestCase):
             with self.subTest(
                 f'Проверка редактирования на занятое имя {new_name} для лекарства: {current_name}.'
             ):
-                start_count = len(self.manager_2count._MedicineManager__medicines)
+                start_count = len(self.manager_2count.medicines)
                 
                 with self.assertRaises(
                     ValueError,
@@ -291,7 +287,7 @@ class TestMedicineManager(unittest.TestCase):
                 ):
                     self.manager_2count.edit_medicine(current_name, new_name)
                 
-                end_count = len(self.manager_2count._MedicineManager__medicines)
+                end_count = len(self.manager_2count.medicines)
 
                 self.assertEqual(
                     end_count,
@@ -300,7 +296,7 @@ class TestMedicineManager(unittest.TestCase):
                 )
 
     def test_edit_medicine_non_exist(self):
-        start_count = len(self.manager_1count._MedicineManager__medicines)
+        start_count = len(self.manager_1count.medicines)
         
         with self.assertRaises(
             ValueError,
@@ -308,7 +304,7 @@ class TestMedicineManager(unittest.TestCase):
         ):
             self.manager_1count.edit_medicine(self.medicine_name_2, self.medicine_name_3)
         
-        end_count = len(self.manager_1count._MedicineManager__medicines)
+        end_count = len(self.manager_1count.medicines)
 
         self.assertEqual(
             end_count,

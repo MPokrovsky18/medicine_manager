@@ -52,8 +52,31 @@ class MedicineManager:
     Класс-менеджер для управления лекарствами.
     """
 
-    def __init__(self) -> None:
-        self.__medicines: list[Medicine] = []
+    def __init__(self, medicines: list[Medicine] = None) -> None:
+        self.__medicines: list[Medicine] = self.validate_medicines(medicines)
+
+    def validate_medicines(self, medicines: list[Medicine]) -> list[Medicine]:
+        """Проверка элементов передаваемого списка на соответствие типу Medicine."""
+        if not medicines:
+            return []
+
+        if isinstance(medicines, Medicine):
+            return [medicines]
+        
+        if not isinstance(medicines, list):
+            raise TypeError(f'Передан другой тип. Ожидается list[{Medicine.__name__}]')
+
+        if not all(isinstance(x, Medicine) for x in medicines):
+            raise TypeError(f'Не все объекты в списке типа {Medicine.__name__}.')
+
+        return medicines
+
+    @property
+    def medicines(self):
+        """
+        Получить копию списка лекарств.
+        """
+        return self.__medicines.copy()
 
     @property
     def medicine_count(self) -> int:
