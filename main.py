@@ -1,6 +1,6 @@
-from console import ConsoleApp
+from app import MedicineApp
 
 
 if __name__ == '__main__':
-    app = ConsoleApp()
-    app.start()
+    app = MedicineApp()
+    app.run()

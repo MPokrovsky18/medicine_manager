@@ -1,7 +1,8 @@
+from config import APP_NAME
 from medicine import MedicineManager
 
 
-APP_NAME = 'Лекарственный менеджер'
+APP_NAME = APP_NAME
 SPLIT_LINE = '------------------'
 MENU_ORDER = 'S', 'A', 'E', 'D', 'Q'
 
@@ -10,7 +11,7 @@ class ConsoleApp:
     Представление консольного интерфейса.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, manager: MedicineManager = None) -> None:
         self.__commands = {
             'Q': ('Выйти из программы', self.quit),
             'Й': ('Выйти из программы', self.quit),
@@ -23,8 +24,14 @@ class ConsoleApp:
             'S': ('Показать все лекарства', self.show_medicines),
             'Ы': ('Показать все лекарства', self.show_medicines),
         }
-        self.__menu = '\n'.join(f' - {self.__commands[command][0]} - {command}' for command in MENU_ORDER)
-        self.__manager = MedicineManager()
+        self.__menu = '\n'.join(
+            f' - {self.__commands[command][0]} - {command}' for command in MENU_ORDER
+        )
+
+        if not manager:
+            self.__manager = MedicineManager()
+        else:
+            self.__manager = manager
 
     def start(self):
         """
