@@ -1,6 +1,6 @@
 from config import JSON_FILE_PATH
 from console import ConsoleApp
-from medicine import MedicineManager
+from medicines.managers import MedicineManager
 from storage import JSONStorageManager
 
 

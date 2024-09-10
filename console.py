@@ -1,5 +1,5 @@
 from config import APP_NAME
-from medicine import MedicineManager
+from medicines.managers import MedicineManager
 
 
 APP_NAME = APP_NAME

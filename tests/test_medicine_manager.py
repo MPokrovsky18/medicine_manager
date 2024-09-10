@@ -1,6 +1,6 @@
 import unittest
 
-from medicine import Medicine, MedicineManager
+from medicines.managers import Medicine, MedicineManager
 
 
 class TestMedicineManager(unittest.TestCase):
