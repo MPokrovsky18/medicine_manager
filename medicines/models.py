@@ -1,3 +1,5 @@
+from datetime import date
+
 from validators import MedicineValidator
 
 
@@ -9,7 +11,7 @@ class Medicine:
     def __init__(self, id, name, expiration_date, is_accepted) -> None:
         self.__id: int = MedicineValidator.validate_id(id)
         self.name: str = name
-        self.expiration_date = expiration_date
+        self.expiration_date: date = expiration_date
         self.is_accepted: bool = is_accepted
 
     def __str__(self) -> str:
@@ -28,11 +30,11 @@ class Medicine:
         self.__name: str = MedicineValidator.validate_name(value)
 
     @property
-    def expiration_date(self):
+    def expiration_date(self) -> date:
         return self.__expiration_date
 
     @expiration_date.setter
-    def expiration_date(self, value: str) -> None:
+    def expiration_date(self, value: date) -> None:
         self.__expiration_date = MedicineValidator.validate_expiration_date(value)
 
     @property
