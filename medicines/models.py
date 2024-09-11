@@ -1,7 +1,4 @@
-import re
-
-
-MIN_LENGTH_NAME = 3
+from validators import MedicineValidator
 
 
 class Medicine:
@@ -10,13 +7,17 @@ class Medicine:
     """
 
     def __init__(self, id, name, expiration_date, is_accepted) -> None:
-        self.id = id
-        self.name = name
+        self.__id: int = MedicineValidator.validate_id(id)
+        self.name: str = name
         self.expiration_date = expiration_date
-        self.is_accepted = is_accepted
+        self.is_accepted: bool = is_accepted
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def id(self) -> int:
+        return self.__id
 
     @property
     def name(self) -> str:
@@ -24,27 +25,20 @@ class Medicine:
 
     @name.setter
     def name(self, value: str) -> None:
-        self.__name = self.validate_name(value)
+        self.__name: str = MedicineValidator.validate_name(value)
 
-    @staticmethod
-    def validate_name(name: str) -> str:
-        """
-        Проверка валидности названия лекарства.
-        """
-        if not isinstance(name, str):
-            raise TypeError(
-                f'Передана не строка. arg: {name} - type: {type(name).__name__}.'
-            )
+    @property
+    def expiration_date(self):
+        return self.__expiration_date
 
-        validated_name = name.strip().lower()
+    @expiration_date.setter
+    def expiration_date(self, value: str) -> None:
+        self.__expiration_date = MedicineValidator.validate_expiration_date(value)
 
-        if not validated_name:
-            raise ValueError('Название не может быть пустым или состоять только из пробелов.')
-        
-        if len(validated_name) < MIN_LENGTH_NAME:
-            raise ValueError(f'Название должно быть не менее {MIN_LENGTH_NAME} символов.')
+    @property
+    def is_accepted(self) -> str:
+        return self.__is_accepted
 
-        if not re.match(r'^[a-zA-Zа-яА-яёЁ0-9 ]+$', validated_name):
-            raise ValueError('Название может содержать только буквы, цифры и пробелы.')
-
-        return validated_name
+    @is_accepted.setter
+    def is_accepted(self, value: str) -> None:
+        self.__is_accepted: bool = MedicineValidator.validate_is_accepted(value)
