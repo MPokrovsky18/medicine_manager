@@ -1,6 +1,8 @@
 from datetime import date
 import re
 
+from models import Medicine
+
 
 MIN_LENGTH_NAME = 3
 MAX_LENGTH_NAME = 50
@@ -82,3 +84,17 @@ class MedicineValidator:
         MedicineValidator.field_is_instance_else_error(is_accepted, bool, 'is_accepted')
 
         return is_accepted
+
+
+class MedicineStorageValidator:
+    """
+    Класс для валидации полей экземпляра типа Medicine.
+    """
+
+    @staticmethod
+    def validate_medicines(medicines: dict[int, Medicine]) -> dict[int, Medicine]:
+        """
+        Проверка валидности списка лекарств.
+        """
+        # TODO: реализовать проверку данных списка лекарств
+        return medicines
