@@ -3,6 +3,10 @@ from datetime import date
 
 from validators import MedicineValidator, MedicineStorageValidator
 
+# TODO:
+#   Добавить свойство "просрочено ли"
+#   Доделать строковое представление
+#   Переопределить метод __dict__
 
 class Medicine:
     """
@@ -59,6 +63,8 @@ class Medicine:
     def is_accepted(self, value: str) -> None:
         self.__is_accepted: bool = MedicineValidator.validate_is_accepted(value)
 
+# TODO:
+#   Реализовать фильтрацию списка по полям: просроченые, активные
 
 class MedicineStorage:
     """
@@ -142,7 +148,10 @@ class MedicineStorage:
         Получить список всех лекарств или лекарство по ID.
         """
         if id is None:
-            return copy(list(self.__medicines.values()))
+            return sorted(
+                [copy(medicine) for medicine in self.__medicines.values()],
+                key=lambda x: x.id
+            )
 
         if id not in self.__medicines:
             raise ValueError(f'Лекарство с ID {id} не найдено.')
