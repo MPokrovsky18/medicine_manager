@@ -1,3 +1,4 @@
+from copy import copy
 from datetime import date
 
 from validators import MedicineValidator, MedicineStorageValidator
@@ -8,8 +9,12 @@ class Medicine:
     Класс для представления лекарства.
     """
 
-    def __init__(self, id, name, expiration_date, is_accepted) -> None:
-        self.id: int = id
+    def __init__(
+            self, name: str, 
+            expiration_date: date, 
+            is_accepted: bool
+    ) -> None:
+        self.__id: int = 0
         self.name: str = name
         self.expiration_date: date = expiration_date
         self.is_accepted: bool = is_accepted
@@ -20,10 +25,15 @@ class Medicine:
     @property
     def id(self) -> int:
         return self.__id
-    
-    @id.setter
-    def id(self, value) -> int:
-        self.__id = MedicineValidator.validate_id(id)
+
+    def assign_id(self, value) -> int:
+        """
+        Присвоить id, если ранее не было установлено.
+        """
+        if self.__id != 0:
+            raise ValueError('ID лекарства уже назначен и не может быть изменён.')
+
+        self.__id = MedicineValidator.validate_id(value)
 
     @property
     def name(self) -> str:
@@ -59,45 +69,82 @@ class MedicineStorage:
         self.__medicines: dict[int, Medicine] = {}
         self.__last_id: int =  0
 
-    def check_duplicate(self, medicine: Medicine) -> bool:
-        duplicate = [current for current in self.__medicines.values() if current.name == medicine.name]
-
-        return False if duplicate else True
+    def check_is_not_duplicate(self, medicine: Medicine) -> bool:
+        """
+        Возвращает True, если нет похожих лекарств хранилище.
+        """
+        return not any(medicine.name == current.name for current in self.__medicines)
 
     def __get_new_id(self) -> int:
+        """
+        Создает новый уникальный ID.
+        """
         self.__last_id += 1
         return self.__last_id
 
     def add(self, medicine: Medicine) -> bool:
-        if self.check_duplicate(medicine):
-            medicine.id = self.__get_new_id()
-            self.__medicines[medicine.id] = medicine
-            return True
+        """
+        Добавить лекарство в хранилище.
+        """
+        if not self.check_is_not_duplicate(medicine):
+            raise ValueError(f'Похожий объект уже существует. medicine: {medicine.name}')
 
-        return False
- 
-    def clear_and_add_multiple(self, medicines: list[Medicine]) -> None:
-        self.__medicines = MedicineStorageValidator.validate_medicines(medicines)
-        self.__last_id = max(self.__medicines.keys())
-
-    def remove(self, id) -> bool:
-        if id in self.__medicines:
-            del self.__medicines[id]
-            return True
-        
-        return False
-
-    def update(self, medicine: Medicine) -> bool:
         if medicine.id in self.__medicines:
-            self.__medicines[medicine.id] = medicine
-            return True
-        
-        return False
+            raise ValueError(f'Лекарство с ID: {medicine.id} уже существует.')
 
-    def get(self, id) -> Medicine | None:
-        return self.__medicines.get(id)
+        if medicine.id == 0:
+            medicine.assign_id(self.__get_new_id())
+        else:
+            self.__last_id = max(self.__last_id, medicine.id)
 
-# TODO: Выбрасывать исключения в методах вместо возвращения True/False
-# Добавить методы для фильтрации и возвращения объектов списком
-# Доработать метод проверки дупликатов
-# Добавить докстринги
+        self.__medicines[medicine.id] = medicine
+ 
+    def add_multiple(self, medicines: list[Medicine]) -> None | list[dict[str, any]]:
+        """
+        Добавить список лекарств в хранилище.
+
+        Лекарства, которые не были добавлены, возвращаются в списке словарей с описанием ошибки.
+        """
+        validated_medicines = MedicineStorageValidator.validate_medicines(medicines)
+        not_added_with_error = []
+
+        for medicine in validated_medicines:
+            try:
+                self.add(medicine)
+            except ValueError as e:
+                not_added_with_error.append({
+                    'medicine': medicine,
+                    'error': str(e)
+                })
+
+        return not_added_with_error or None
+
+    def remove(self, id: int) -> None:
+        """
+        Удалить лекарство из хранилища.
+        """
+        if id not in self.__medicines:
+            raise ValueError(f'Лекарство с ID {id} не найдено.')
+
+        del self.__medicines[id]
+
+    def update(self, medicine: Medicine) -> None:
+        """
+        Обновить лекарство в хранилище.
+        """
+        if medicine.id not in self.__medicines:
+            raise ValueError(f'Лекарство с ID {medicine.id} не найдено.')
+
+        self.__medicines[medicine.id] = medicine
+
+    def get(self, id: int = None) -> Medicine:
+        """
+        Получить список всех лекарств или лекарство по ID.
+        """
+        if id is None:
+            return copy(list(self.__medicines.values()))
+
+        if id not in self.__medicines:
+            raise ValueError(f'Лекарство с ID {id} не найдено.')
+
+        return copy(self.__medicines[id])
