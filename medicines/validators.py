@@ -1,8 +1,6 @@
 from datetime import date
 import re
 
-from models import Medicine
-
 
 MIN_LENGTH_NAME = 3
 MAX_LENGTH_NAME = 50
@@ -69,7 +67,7 @@ class MedicineValidator:
         """
         MedicineValidator.field_is_instance_else_error(expiration_date, date, 'expiration_date')
 
-        delta_year = abs((expiration_date - date.today).days) // 365
+        delta_year = abs((expiration_date - date.today()).days) // 365
 
         if delta_year > MAX_DELTA_YEAR:
             raise ValueError(f'Год срока годности не может отличатся больше чем на {MAX_DELTA_YEAR} от текущего.')
@@ -92,7 +90,7 @@ class MedicineStorageValidator:
     """
 
     @staticmethod
-    def validate_medicines(medicines: dict[int, Medicine]) -> dict[int, Medicine]:
+    def validate_medicines(medicines):
         """
         Проверка валидности списка лекарств.
         """

@@ -3,10 +3,6 @@ from datetime import date
 
 from validators import MedicineValidator, MedicineStorageValidator
 
-# TODO:
-#   Добавить свойство "просрочено ли"
-#   Доделать строковое представление
-#   Переопределить метод __dict__
 
 class Medicine:
     """
@@ -22,9 +18,6 @@ class Medicine:
         self.name: str = name
         self.expiration_date: date = expiration_date
         self.is_accepted: bool = is_accepted
-
-    def __str__(self) -> str:
-        return self.name
 
     @property
     def id(self) -> int:
@@ -56,6 +49,11 @@ class Medicine:
         self.__expiration_date = MedicineValidator.validate_expiration_date(value)
 
     @property
+    def is_expired(self) -> bool:
+        "Возвращает True, если лекарство просрочено."
+        return self.expiration_date < date.today()
+
+    @property
     def is_accepted(self) -> str:
         return self.__is_accepted
 
@@ -63,8 +61,17 @@ class Medicine:
     def is_accepted(self, value: str) -> None:
         self.__is_accepted: bool = MedicineValidator.validate_is_accepted(value)
 
-# TODO:
-#   Реализовать фильтрацию списка по полям: просроченые, активные
+    def __str__(self) -> str:
+        return self.name
+    
+    def __dict__(self) -> dict:
+        return {
+            'id': self.__id,
+            'name': self.__name,
+            'expiration_date': str(self.__expiration_date),
+            'is_accepted': self.__is_accepted
+        }
+
 
 class MedicineStorage:
     """
@@ -143,7 +150,7 @@ class MedicineStorage:
 
         self.__medicines[medicine.id] = medicine
 
-    def get(self, id: int = None) -> Medicine:
+    def get(self, id: int = None) -> Medicine | list[Medicine]:
         """
         Получить список всех лекарств или лекарство по ID.
         """
@@ -157,3 +164,15 @@ class MedicineStorage:
             raise ValueError(f'Лекарство с ID {id} не найдено.')
 
         return copy(self.__medicines[id])
+
+    def get_all_expired(self) -> list[Medicine]:
+        """
+        Получить список всех просроченных лекарств.
+        """
+        return [medicine for medicine in self.get() if medicine.is_expired]
+
+    def get_all_accepted(self) -> list[Medicine]:
+        """
+        Получить список всех принимаемых лекарств.
+        """
+        return [medicine for medicine in self.get() if medicine.is_accepted]
