@@ -11,7 +11,7 @@ class JSONMedicineSerializer:
         Сериализировать список лекарств в json.
         """
         return {
-            'medicines': [{'name': medicine.name} for medicine in medicines]
+            'medicines': [medicine.__dict__ for medicine in medicines]
         }
 
     def deserialize(self, data) -> list[Medicine]:
@@ -22,8 +22,16 @@ class JSONMedicineSerializer:
         medicines = []
 
         for medicine_data in medecines_data:
+            id = medecines_data['id']
             name = medicine_data['name']
-            medicine = Medicine(name)
+            expiration_date = medicine_data['expiration_date']
+            is_accepted = medicine_data['is_accepted']
+            medicine = Medicine(
+                name=name,
+                expiration_date=expiration_date,
+                is_accepted=is_accepted
+            )
+            medicine.assign_id(id)
             medicines.append(medicine)
 
         return medicines
