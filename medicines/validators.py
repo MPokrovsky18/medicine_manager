@@ -82,17 +82,3 @@ class MedicineValidator:
         MedicineValidator.field_is_instance_else_error(is_accepted, bool, 'is_accepted')
 
         return is_accepted
-
-
-class MedicineStorageValidator:
-    """
-    Класс для валидации полей экземпляра типа Medicine.
-    """
-
-    @staticmethod
-    def validate_medicines(medicines):
-        """
-        Проверка валидности списка лекарств.
-        """
-        # TODO: реализовать проверку данных списка лекарств
-        return medicines

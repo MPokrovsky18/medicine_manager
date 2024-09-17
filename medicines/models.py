@@ -23,7 +23,7 @@ class Medicine:
     def id(self) -> int:
         return self.__id
 
-    def assign_id(self, value) -> int:
+    def assign_id(self, value) -> None:
         """
         Присвоить id, если ранее не было установлено.
         """
@@ -86,6 +86,9 @@ class MedicineStorage:
         """
         Возвращает True, если нет похожих лекарств хранилище.
         """
+        if not isinstance(medicine, Medicine):
+            raise TypeError(f'Ожидался тип Medicine для аргумента, а получен: {type(medicine).__name__}.')
+
         return not any(medicine.name == current.name for current in self.__medicines)
 
     def __get_new_id(self) -> int:
@@ -99,8 +102,11 @@ class MedicineStorage:
         """
         Добавить лекарство в хранилище.
         """
+        if not isinstance(medicine, Medicine):
+            raise TypeError(f'Ожидался тип Medicine для аргумента, а получен: {type(medicine).__name__}.')
+
         if not self.check_is_not_duplicate(medicine):
-            raise ValueError(f'Похожий объект уже существует. medicine: {medicine.name}')
+            raise ValueError(f'Похожий объект уже существует. medicine: {medicine.name}.')
 
         if medicine.id in self.__medicines:
             raise ValueError(f'Лекарство с ID: {medicine.id} уже существует.')
@@ -110,18 +116,24 @@ class MedicineStorage:
         else:
             self.__last_id = max(self.__last_id, medicine.id)
 
-        self.__medicines[medicine.id] = medicine
- 
+        self.__medicines[medicine.id] = copy(medicine)
+
     def add_multiple(self, medicines: list[Medicine]) -> None | list[dict[str, any]]:
         """
         Добавить список лекарств в хранилище.
 
         Лекарства, которые не были добавлены, возвращаются в списке словарей с описанием ошибки.
         """
-        validated_medicines = MedicineStorageValidator.validate_medicines(medicines)
+        if not isinstance(medicines, list):
+            raise TypeError(f'Метод принимает тип list[Medicine]. Получен: {type(medicines).__name__}.')
+
+        for medicine in medicines:
+            if not isinstance(medicine, Medicine):
+                raise TypeError(f'Ожидался тип Medicine для всех объектов в списке, а получен: {type(medicine).__name__}.')
+
         not_added_with_error = []
 
-        for medicine in validated_medicines:
+        for medicine in medicine:
             try:
                 self.add(medicine)
             except ValueError as e:
@@ -136,6 +148,9 @@ class MedicineStorage:
         """
         Удалить лекарство из хранилища.
         """
+        if not isinstance(id, int):
+            raise TypeError('Передаваемый id должен быть типа int.')
+
         if id not in self.__medicines:
             raise ValueError(f'Лекарство с ID {id} не найдено.')
 
@@ -145,10 +160,13 @@ class MedicineStorage:
         """
         Обновить лекарство в хранилище.
         """
+        if not isinstance(medicine, Medicine):
+            raise TypeError(f'Ожидался тип Medicine для аргумента, а получен: {type(medicine).__name__}.')
+
         if medicine.id not in self.__medicines:
             raise ValueError(f'Лекарство с ID {medicine.id} не найдено.')
 
-        self.__medicines[medicine.id] = medicine
+        self.__medicines[medicine.id] = copy(medicine)
 
     def get(self, id: int = None) -> Medicine | list[Medicine]:
         """
@@ -159,6 +177,9 @@ class MedicineStorage:
                 [copy(medicine) for medicine in self.__medicines.values()],
                 key=lambda x: x.id
             )
+
+        if not isinstance(id, int):
+            raise TypeError('Передаваемый id должен быть типа int.')
 
         if id not in self.__medicines:
             raise ValueError(f'Лекарство с ID {id} не найдено.')
