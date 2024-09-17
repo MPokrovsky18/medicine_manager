@@ -10,18 +10,24 @@ class MedicineManager:
         self.__medicines: list[Medicine] = self.validate_medicines(medicines)
 
     def validate_medicines(self, medicines: list[Medicine]) -> list[Medicine]:
-        """Проверка элементов передаваемого списка на соответствие типу Medicine."""
+        """
+        Проверка элементов передаваемого списка на соответствие типу Medicine.
+        """
         if not medicines:
             return []
 
         if isinstance(medicines, Medicine):
             return [medicines]
-        
+
         if not isinstance(medicines, list):
-            raise TypeError(f'Передан другой тип. Ожидается list[{Medicine.__name__}]')
+            raise TypeError(
+                f'Передан другой тип. Ожидается list[{Medicine.__name__}]'
+            )
 
         if not all(isinstance(x, Medicine) for x in medicines):
-            raise TypeError(f'Не все объекты в списке типа {Medicine.__name__}.')
+            raise TypeError(
+                f'Не все объекты в списке типа {Medicine.__name__}.'
+            )
 
         return medicines
 
@@ -50,8 +56,10 @@ class MedicineManager:
                 return medicine
 
         return None
-    
-    def check_exist_medicine_or_rise(self, name: str, exists: bool = True) -> Medicine | None:
+
+    def check_exist_medicine_or_rise(
+        self, name: str, exists: bool = True
+    ) -> Medicine | None:
         """
         Проверить объект на существование или отсутствие в списке.
         """
@@ -59,10 +67,10 @@ class MedicineManager:
 
         if not medicine and exists:
             raise ValueError(f'Объект с таким именем не найден: {name}')
-        
+
         if medicine and not exists:
             raise ValueError(f'Объект с таким именем уже существует: {name}')
-        
+
         return medicine if exists else None
 
     def add_medicine(self, name: str) -> None:
@@ -93,7 +101,8 @@ class MedicineManager:
         """
         if self.__medicines:
             return '\n'.join(
-                f'{index+1}. {medicine.name}' for index, medicine in enumerate(self.__medicines)
+                f'{index+1}. {medicine.name}'
+                for index, medicine in enumerate(self.__medicines)
             )
 
         return 'Список пуст!'
