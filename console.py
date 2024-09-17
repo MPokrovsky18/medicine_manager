@@ -6,6 +6,7 @@ APP_NAME = APP_NAME
 SPLIT_LINE = '------------------'
 MENU_ORDER = 'S', 'A', 'E', 'D', 'Q'
 
+
 class ConsoleApp:
     """
     Представление консольного интерфейса.
@@ -25,7 +26,8 @@ class ConsoleApp:
             'Ы': ('Показать все лекарства', self.show_medicines),
         }
         self.__menu = '\n'.join(
-            f' - {self.__commands[command][0]} - {command}' for command in MENU_ORDER
+            f' - {self.__commands[command][0]} - {command}'
+            for command in MENU_ORDER
         )
 
         if not manager:
@@ -54,7 +56,9 @@ class ConsoleApp:
         print(self.__menu)
         print(SPLIT_LINE)
 
-    def execute_if_confirmed(self, method: callable, question: str, *args) -> None:
+    def execute_if_confirmed(
+        self, method: callable, question: str, *args
+    ) -> None:
         """
         Выполнить метод, если пользователь подтвердил ввод.
         """
@@ -122,7 +126,7 @@ class ConsoleApp:
         Показать список лекарств."""
         print(self.__manager.get_medicines_list())
         print(SPLIT_LINE)
-    
+
     def quit(self) -> None:
         """
         Завершить работу программы.

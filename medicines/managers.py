@@ -1,4 +1,5 @@
-from medicines.models import Medicine
+from medicines.models import Medicine, MedicineStorage
+from medicines.validators import MedicineValidator
 
 
 class MedicineManager:
@@ -7,51 +8,32 @@ class MedicineManager:
     """
 
     def __init__(self, medicines: list[Medicine] = None) -> None:
-        self.__medicines: list[Medicine] = self.validate_medicines(medicines)
+        self.__medicine_storage: MedicineStorage = MedicineStorage()
 
-    def validate_medicines(self, medicines: list[Medicine]) -> list[Medicine]:
-        """
-        Проверка элементов передаваемого списка на соответствие типу Medicine.
-        """
-        if not medicines:
-            return []
-
-        if isinstance(medicines, Medicine):
-            return [medicines]
-
-        if not isinstance(medicines, list):
-            raise TypeError(
-                f'Передан другой тип. Ожидается list[{Medicine.__name__}]'
-            )
-
-        if not all(isinstance(x, Medicine) for x in medicines):
-            raise TypeError(
-                f'Не все объекты в списке типа {Medicine.__name__}.'
-            )
-
-        return medicines
+        if medicines:
+            self.__medicine_storage.add_multiple(medicines)
 
     @property
     def medicines(self):
         """
         Получить копию списка лекарств.
         """
-        return self.__medicines.copy()
+        return self.__medicine_storage.get()
 
     @property
     def medicine_count(self) -> int:
         """
         Длина списка лекарств.
         """
-        return len(self.__medicines)
+        return self.__medicine_storage.count
 
     def find_medicine(self, name: str) -> Medicine | None:
         """
         Получить объект из списка, если он существует.
         """
-        target_name = Medicine.validate_name(name)
+        target_name = MedicineValidator.validate_name(name)
 
-        for medicine in self.__medicines:
+        for medicine in self.__medicine_storage.get():
             if medicine.name == target_name:
                 return medicine
 
@@ -78,14 +60,14 @@ class MedicineManager:
         Добавить лекарство в список.
         """
         self.check_exist_medicine_or_rise(name, exists=False)
-        self.__medicines.append(Medicine(name))
+        self.__medicine_storage.add(Medicine(name))
 
     def remove_medicine(self, name: str) -> None:
         """
         Удалить лекарство из списка.
         """
         target = self.check_exist_medicine_or_rise(name)
-        self.__medicines.remove(target)
+        self.__medicine_storage.remove(target.id)
 
     def edit_medicine(self, current_name: str, new_name: str) -> None:
         """
@@ -94,15 +76,18 @@ class MedicineManager:
         medicine = self.check_exist_medicine_or_rise(current_name)
         self.check_exist_medicine_or_rise(new_name, exists=False)
         medicine.name = new_name
+        self.__medicine_storage.update(medicine)
 
     def get_medicines_list(self) -> str:
         """
         Получить список лекарств.
         """
-        if self.__medicines:
+        medicines = self.__medicine_storage.get()
+
+        if medicines:
             return '\n'.join(
                 f'{index+1}. {medicine.name}'
-                for index, medicine in enumerate(self.__medicines)
+                for index, medicine in enumerate(medicines)
             )
 
         return 'Список пуст!'

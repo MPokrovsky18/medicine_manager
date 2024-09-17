@@ -1,7 +1,7 @@
 from copy import copy
 from datetime import date
 
-from validators import MedicineValidator
+from medicines.validators import MedicineValidator
 
 
 class Medicine:
@@ -11,8 +11,8 @@ class Medicine:
 
     def __init__(
             self, name: str,
-            expiration_date: date,
-            is_accepted: bool
+            expiration_date: date = date(date.today().year + 1, 1, 1),
+            is_accepted: bool = False
     ) -> None:
         self.__id: int = 0
         self.name: str = name
@@ -67,16 +67,19 @@ class Medicine:
             MedicineValidator.validate_is_accepted(value)
         )
 
-    def __str__(self) -> str:
-        return self.name
-
-    def __dict__(self) -> dict:
+    def to_dict(self) -> dict:
+        """
+        Вернуть объект как словарь.
+        """
         return {
             'id': self.__id,
             'name': self.__name,
             'expiration_date': str(self.__expiration_date),
             'is_accepted': self.__is_accepted
         }
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class MedicineStorage:
@@ -87,6 +90,13 @@ class MedicineStorage:
     def __init__(self) -> None:
         self.__medicines: dict[int, Medicine] = {}
         self.__last_id: int = 0
+
+    @property
+    def count(self):
+        """
+        Количество лекарств в хранилище.
+        """
+        return len(self.__medicines)
 
     def check_is_not_duplicate(self, medicine: Medicine) -> bool:
         """
@@ -100,7 +110,7 @@ class MedicineStorage:
 
         return not any(
             medicine.name == current.name
-            for current in self.__medicines
+            for current in self.__medicines.values()
         )
 
     def __get_new_id(self) -> int:
@@ -160,7 +170,7 @@ class MedicineStorage:
 
         not_added_with_error = []
 
-        for medicine in medicine:
+        for medicine in medicines:
             try:
                 self.add(medicine)
             except ValueError as e:
@@ -195,6 +205,12 @@ class MedicineStorage:
 
         if medicine.id not in self.__medicines:
             raise ValueError(f'Лекарство с ID {medicine.id} не найдено.')
+
+        if not self.check_is_not_duplicate(medicine):
+            raise ValueError(
+                'Похожий объект уже существует. '
+                + f'medicine: {medicine.name}.'
+            )
 
         self.__medicines[medicine.id] = copy(medicine)
 

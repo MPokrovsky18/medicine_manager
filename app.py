@@ -14,7 +14,7 @@ class MedicineApp:
         saved_data = self.__storage.load_data()
         self.__manager = MedicineManager(saved_data)
         self.__app = ConsoleApp(self.__manager)
-    
+
     def run(self):
         """
         Запустить приложение.
@@ -22,7 +22,7 @@ class MedicineApp:
         try:
             self.__app.start()
         except Exception as e:
-            print(f'Ошибка: {e}')
+            print(e)
         finally:
             self.__storage.save_data(self.__manager.medicines)
             print('Данные сохранены.')

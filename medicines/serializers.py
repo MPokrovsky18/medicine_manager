@@ -1,3 +1,5 @@
+from datetime import date
+
 from medicines.managers import Medicine
 
 
@@ -11,20 +13,22 @@ class JSONMedicineSerializer:
         Сериализировать список лекарств в json.
         """
         return {
-            'medicines': [medicine.__dict__ for medicine in medicines]
+            'medicines': [medicine.to_dict() for medicine in medicines]
         }
 
     def deserialize(self, data) -> list[Medicine]:
         """
         Десериализировать json-данные в список лекарств.
         """
-        medecines_data = data.get('medicines', [])
+        medicines_data = data.get('medicines', [])
         medicines = []
 
-        for medicine_data in medecines_data:
-            id = medecines_data['id']
+        for medicine_data in medicines_data:
+            id = medicine_data['id']
             name = medicine_data['name']
-            expiration_date = medicine_data['expiration_date']
+            expiration_date = date(
+                *map(int, medicine_data['expiration_date'].split('-'))
+            )
             is_accepted = medicine_data['is_accepted']
             medicine = Medicine(
                 name=name,
