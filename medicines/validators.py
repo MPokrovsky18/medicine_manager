@@ -13,13 +13,17 @@ class MedicineValidator:
     """
 
     @staticmethod
-    def field_is_instance_else_error(field: object, target_type: type, field_name: str) -> None:
+    def field_is_instance_else_error(
+        field: object, target_type: type, field_name: str
+    ) -> None:
         """
         Соответствует ли объект ожидаемому типу, иначе выбросить исключение.
         """
         if not isinstance(field, target_type):
             raise TypeError(
-                f'Для поля "{field_name}" ожидался тип "{target_type.__name__}.". Получен тип "{type(field).__name__}".'
+                f'Для поля "{field_name}" ожидался '
+                + f'тип "{target_type.__name__}.". '
+                + f'Получен тип "{type(field).__name__}".'
             )
 
     @staticmethod
@@ -32,22 +36,31 @@ class MedicineValidator:
         validated_name = name.strip().lower()
 
         if not validated_name:
-            raise ValueError('Название не может быть пустым или состоять только из пробелов.')
+            raise ValueError(
+                'Название не может быть пустым '
+                + 'или состоять только из пробелов.'
+            )
 
         if len(validated_name) < MIN_LENGTH_NAME:
-            raise ValueError(f'Название должно быть не менее {MIN_LENGTH_NAME} символов.')
+            raise ValueError(
+                f'Название должно быть не менее {MIN_LENGTH_NAME} символов.'
+            )
 
         if len(validated_name) > MAX_LENGTH_NAME:
-            raise ValueError(f'Название должно быть не более {MAX_LENGTH_NAME} символов.')
-        
+            raise ValueError(
+                f'Название должно быть не более {MAX_LENGTH_NAME} символов.'
+            )
+
         if validated_name.isdigit():
             raise ValueError('Название не может содержать только цифры.')
 
         if not re.match(r'^[a-zA-Zа-яА-яёЁ0-9 ]+$', validated_name):
-            raise ValueError('Название может содержать только буквы, цифры и пробелы.')
+            raise ValueError(
+                'Название может содержать только буквы, цифры и пробелы.'
+            )
 
         return validated_name
-    
+
     @staticmethod
     def validate_id(id: int) -> int:
         """
@@ -65,12 +78,17 @@ class MedicineValidator:
         """
         Проверка валидности даты срока годности.
         """
-        MedicineValidator.field_is_instance_else_error(expiration_date, date, 'expiration_date')
+        MedicineValidator.field_is_instance_else_error(
+            expiration_date, date, 'expiration_date'
+        )
 
         delta_year = abs((expiration_date - date.today()).days) // 365
 
         if delta_year > MAX_DELTA_YEAR:
-            raise ValueError(f'Год срока годности не может отличатся больше чем на {MAX_DELTA_YEAR} от текущего.')
+            raise ValueError(
+                'Год срока годности не может отличатся '
+                + f'больше чем на {MAX_DELTA_YEAR} от текущего.'
+            )
 
         return expiration_date
 
@@ -79,6 +97,8 @@ class MedicineValidator:
         """
         Проверка валидности is_accepted.
         """
-        MedicineValidator.field_is_instance_else_error(is_accepted, bool, 'is_accepted')
+        MedicineValidator.field_is_instance_else_error(
+            is_accepted, bool, 'is_accepted'
+        )
 
         return is_accepted

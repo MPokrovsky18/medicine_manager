@@ -10,7 +10,9 @@ class JSONMedicineSerializer:
         """
         Сериализировать список лекарств в json.
         """
-        return {'medicines': [{'name': medicine.name} for medicine in medicines]}
+        return {
+            'medicines': [{'name': medicine.name} for medicine in medicines]
+        }
 
     def deserialize(self, data) -> list[Medicine]:
         """
