@@ -9,7 +9,7 @@ MAX_DELTA_YEAR = 2
 
 class MedicineValidator:
     """
-    Класс для валидации полей экземпляра типа Medicine.
+    Класс для валидации полей экземпляра типа BaseMedicine.
     """
 
     @staticmethod
@@ -27,41 +27,6 @@ class MedicineValidator:
             )
 
     @staticmethod
-    def validate_name(name: str) -> str:
-        """
-        Проверка валидности названия.
-        """
-        MedicineValidator.field_is_instance_else_error(name, str, 'name')
-
-        validated_name = name.strip().lower()
-
-        if not validated_name:
-            raise ValueError(
-                'Название не может быть пустым '
-                + 'или состоять только из пробелов.'
-            )
-
-        if len(validated_name) < MIN_LENGTH_NAME:
-            raise ValueError(
-                f'Название должно быть не менее {MIN_LENGTH_NAME} символов.'
-            )
-
-        if len(validated_name) > MAX_LENGTH_NAME:
-            raise ValueError(
-                f'Название должно быть не более {MAX_LENGTH_NAME} символов.'
-            )
-
-        if validated_name.isdigit():
-            raise ValueError('Название не может содержать только цифры.')
-
-        if not re.match(r'^[a-zA-Zа-яА-яёЁ0-9 ]+$', validated_name):
-            raise ValueError(
-                'Название может содержать только буквы, цифры и пробелы.'
-            )
-
-        return validated_name
-
-    @staticmethod
     def validate_id(id: int) -> int:
         """
         Проверка валидности id.
@@ -72,6 +37,41 @@ class MedicineValidator:
             raise ValueError('id должен быть положительным.')
 
         return id
+
+    @staticmethod
+    def validate_title(title: str) -> str:
+        """
+        Проверка валидности названия.
+        """
+        MedicineValidator.field_is_instance_else_error(title, str, 'title')
+
+        validated_title = title.strip().lower()
+
+        if not validated_title:
+            raise ValueError(
+                'Название не может быть пустым '
+                + 'или состоять только из пробелов.'
+            )
+
+        if len(validated_title) < MIN_LENGTH_NAME:
+            raise ValueError(
+                f'Название должно быть не менее {MIN_LENGTH_NAME} символов.'
+            )
+
+        if len(validated_title) > MAX_LENGTH_NAME:
+            raise ValueError(
+                f'Название должно быть не более {MAX_LENGTH_NAME} символов.'
+            )
+
+        if validated_title.isdigit():
+            raise ValueError('Название не может содержать только цифры.')
+
+        if not re.match(r'^[a-zA-Zа-яА-яёЁ0-9 ]+$', validated_title):
+            raise ValueError(
+                'Название может содержать только буквы, цифры и пробелы.'
+            )
+
+        return validated_title
 
     @staticmethod
     def validate_expiration_date(expiration_date: date) -> date:
@@ -93,12 +93,29 @@ class MedicineValidator:
         return expiration_date
 
     @staticmethod
-    def validate_is_accepted(is_accepted: bool) -> bool:
+    def validate_capacity(capacity: float) -> float:
         """
-        Проверка валидности is_accepted.
+        Проверка валидности capacity.
         """
         MedicineValidator.field_is_instance_else_error(
-            is_accepted, bool, 'is_accepted'
+            capacity, float, 'capacity'
         )
 
-        return is_accepted
+        if capacity <= 0:
+            raise ValueError('capacity должен быть положительным.')
+
+        return capacity
+
+    @staticmethod
+    def validate_quantity(quantity: float) -> float:
+        """
+        Проверка валидности quantity.
+        """
+        MedicineValidator.field_is_instance_else_error(
+            quantity, float, 'quantity'
+        )
+
+        if quantity < 0:
+            raise ValueError('quantity не может быть отрицательным.')
+
+        return quantity
