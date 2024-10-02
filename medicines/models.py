@@ -45,26 +45,11 @@ class MedicineStorage:
         self.__last_id: int = 0
 
     @property
-    def count(self):
+    def count(self) -> int:
         """
         Количество лекарств в хранилище.
         """
         return len(self.__medicines)
-
-    def check_is_not_duplicate(self, medicine: BaseMedicine) -> bool:
-        """
-        Возвращает True, если нет похожих лекарств хранилище.
-        """
-        if not isinstance(medicine, BaseMedicine):
-            raise TypeError(
-                'Ожидался тип Medicine для аргумента, '
-                + f'а получен: {type(medicine).__name__}.'
-            )
-
-        return not any(
-            medicine.name == current.name
-            for current in self.__medicines.values()
-        )
 
     def __get_new_id(self) -> int:
         """
@@ -73,20 +58,14 @@ class MedicineStorage:
         self.__last_id += 1
         return self.__last_id
 
-    def add(self, medicine: BaseMedicine) -> bool:
+    def add(self, medicine: BaseMedicine) -> None:
         """
         Добавить лекарство в хранилище.
         """
         if not isinstance(medicine, BaseMedicine):
             raise TypeError(
-                'Ожидался тип Medicine для аргумента, '
+                'Ожидался тип BaseMedicine для аргумента, '
                 + f'а получен: {type(medicine).__name__}.'
-            )
-
-        if not self.check_is_not_duplicate(medicine):
-            raise ValueError(
-                'Похожий объект уже существует. '
-                + f'medicine: {medicine.name}.'
             )
 
         if medicine.id in self.__medicines:
@@ -110,14 +89,14 @@ class MedicineStorage:
         """
         if not isinstance(medicines, list):
             raise TypeError(
-                'Метод принимает тип list[Medicine]. '
+                'Метод принимает тип list[BaseMedicine]. '
                 + f'Получен: {type(medicines).__name__}.'
             )
 
         for medicine in medicines:
             if not isinstance(medicine, BaseMedicine):
                 raise TypeError(
-                    'Ожидался тип Medicine для всех объектов в списке, '
+                    'Ожидался тип BaseMedicine для всех объектов в списке, '
                     + f'а получен: {type(medicine).__name__}.'
                 )
 
@@ -125,7 +104,7 @@ class MedicineStorage:
 
         for medicine in medicines:
             try:
-                self.add(medicine)
+                self.add(copy(medicine))
             except ValueError as e:
                 not_added_with_error.append({
                     'medicine': medicine,
@@ -158,12 +137,6 @@ class MedicineStorage:
 
         if medicine.id not in self.__medicines:
             raise ValueError(f'Лекарство с ID {medicine.id} не найдено.')
-
-        if not self.check_is_not_duplicate(medicine):
-            raise ValueError(
-                'Похожий объект уже существует. '
-                + f'medicine: {medicine.name}.'
-            )
 
         self.__medicines[medicine.id] = copy(medicine)
 
