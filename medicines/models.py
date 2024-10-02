@@ -1,85 +1,38 @@
 from copy import copy
-from datetime import date
 
-from medicines.validators import MedicineValidator
+from medicines.base import BaseMedicine
 
 
-class Medicine:
+DEFAULT_DROP_VOLUME = 0.05
+
+
+class Pills(BaseMedicine):
     """
-    Класс для представления лекарства.
+    Класс представления лекарства в виде таблеток.
     """
-
-    def __init__(
-            self, name: str,
-            expiration_date: date = date(date.today().year + 1, 1, 1),
-            is_accepted: bool = False
-    ) -> None:
-        self.__id: int = 0
-        self.name: str = name
-        self.expiration_date: date = expiration_date
-        self.is_accepted: bool = is_accepted
-
-    @property
-    def id(self) -> int:
-        return self.__id
-
-    def assign_id(self, value) -> None:
-        """
-        Присвоить id, если ранее не было установлено.
-        """
-        if self.__id != 0:
-            raise ValueError(
-                'ID лекарства уже назначен и не может быть изменён.'
-            )
-
-        self.__id = MedicineValidator.validate_id(value)
-
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self.__name: str = MedicineValidator.validate_name(value)
-
-    @property
-    def expiration_date(self) -> date:
-        return self.__expiration_date
-
-    @expiration_date.setter
-    def expiration_date(self, value: date) -> None:
-        self.__expiration_date = (
-            MedicineValidator.validate_expiration_date(value)
-        )
-
-    @property
-    def is_expired(self) -> bool:
-        "Возвращает True, если лекарство просрочено."
-        return self.expiration_date < date.today()
-
-    @property
-    def is_accepted(self) -> str:
-        return self.__is_accepted
-
-    @is_accepted.setter
-    def is_accepted(self, value: str) -> None:
-        self.__is_accepted: bool = (
-            MedicineValidator.validate_is_accepted(value)
-        )
-
-    def to_dict(self) -> dict:
-        """
-        Вернуть объект как словарь.
-        """
-        return {
-            'id': self.__id,
-            'name': self.__name,
-            'expiration_date': str(self.__expiration_date),
-            'is_accepted': self.__is_accepted
-        }
 
     def __str__(self) -> str:
-        return self.name
+        return super().__str__() + 'таб.'
+
+    def take_unit(self, units_quantity: float = 1) -> None:
+        if self.can_take_unit and self.quantity >= units_quantity:
+            self.quantity -= units_quantity
+
+
+class Drops(BaseMedicine):
+    """
+    Класс представления лекарства в виде капель.
+    """
+
+    def __str__(self) -> str:
+        return super().__str__() + 'мл.'
+
+    def take_unit(self, units_quantity: float) -> None:
+        if self.can_take_unit:
+            taking_volume = units_quantity * DEFAULT_DROP_VOLUME
+
+            if self.quantity >= taking_volume:
+                self.quantity -= taking_volume
 
 
 class MedicineStorage:
@@ -88,7 +41,7 @@ class MedicineStorage:
     """
 
     def __init__(self) -> None:
-        self.__medicines: dict[int, Medicine] = {}
+        self.__medicines: dict[int, BaseMedicine] = {}
         self.__last_id: int = 0
 
     @property
@@ -98,11 +51,11 @@ class MedicineStorage:
         """
         return len(self.__medicines)
 
-    def check_is_not_duplicate(self, medicine: Medicine) -> bool:
+    def check_is_not_duplicate(self, medicine: BaseMedicine) -> bool:
         """
         Возвращает True, если нет похожих лекарств хранилище.
         """
-        if not isinstance(medicine, Medicine):
+        if not isinstance(medicine, BaseMedicine):
             raise TypeError(
                 'Ожидался тип Medicine для аргумента, '
                 + f'а получен: {type(medicine).__name__}.'
@@ -120,11 +73,11 @@ class MedicineStorage:
         self.__last_id += 1
         return self.__last_id
 
-    def add(self, medicine: Medicine) -> bool:
+    def add(self, medicine: BaseMedicine) -> bool:
         """
         Добавить лекарство в хранилище.
         """
-        if not isinstance(medicine, Medicine):
+        if not isinstance(medicine, BaseMedicine):
             raise TypeError(
                 'Ожидался тип Medicine для аргумента, '
                 + f'а получен: {type(medicine).__name__}.'
@@ -147,7 +100,7 @@ class MedicineStorage:
         self.__medicines[medicine.id] = copy(medicine)
 
     def add_multiple(
-        self, medicines: list[Medicine]
+        self, medicines: list[BaseMedicine]
     ) -> None | list[dict[str, any]]:
         """
         Добавить список лекарств в хранилище.
@@ -162,7 +115,7 @@ class MedicineStorage:
             )
 
         for medicine in medicines:
-            if not isinstance(medicine, Medicine):
+            if not isinstance(medicine, BaseMedicine):
                 raise TypeError(
                     'Ожидался тип Medicine для всех объектов в списке, '
                     + f'а получен: {type(medicine).__name__}.'
@@ -193,11 +146,11 @@ class MedicineStorage:
 
         del self.__medicines[id]
 
-    def update(self, medicine: Medicine) -> None:
+    def update(self, medicine: BaseMedicine) -> None:
         """
         Обновить лекарство в хранилище.
         """
-        if not isinstance(medicine, Medicine):
+        if not isinstance(medicine, BaseMedicine):
             raise TypeError(
                 'Ожидался тип Medicine для аргумента, '
                 + f'а получен: {type(medicine).__name__}.'
@@ -214,7 +167,7 @@ class MedicineStorage:
 
         self.__medicines[medicine.id] = copy(medicine)
 
-    def get(self, id: int = None) -> Medicine | list[Medicine]:
+    def get(self, id: int = None) -> BaseMedicine | list[BaseMedicine]:
         """
         Получить список всех лекарств или лекарство по ID.
         """
@@ -232,14 +185,8 @@ class MedicineStorage:
 
         return copy(self.__medicines[id])
 
-    def get_all_expired(self) -> list[Medicine]:
+    def get_all_expired(self) -> list[BaseMedicine]:
         """
         Получить список всех просроченных лекарств.
         """
         return [medicine for medicine in self.get() if medicine.is_expired]
-
-    def get_all_accepted(self) -> list[Medicine]:
-        """
-        Получить список всех принимаемых лекарств.
-        """
-        return [medicine for medicine in self.get() if medicine.is_accepted]
