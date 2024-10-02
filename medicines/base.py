@@ -14,13 +14,12 @@ class BaseMedicine(ABC):
         title: str,
         expiration_date: date,
         capacity: float,
-        quantity: float
     ) -> None:
         self.__id: int = 0
         self.title: str = title
         self.expiration_date: date = expiration_date
         self.capacity: float = capacity
-        self.quantity: float = quantity
+        self.quantity: float = capacity
 
     @property
     def id(self) -> int:
@@ -58,10 +57,22 @@ class BaseMedicine(ABC):
     def quantity(self, value) -> None:
         self.__quantity = mv.validate_quantity(value)
 
+    @property
+    def is_empty(self) -> bool:
+        return self.quantity == 0
+
+    @property
+    def is_expired(self) -> bool:
+        return self.expiration_date <= date.today()
+
+    @property
+    def can_take_unit(self) -> bool:
+        return not (self.is_empty or self.is_expired)
+
     def __str__(self) -> str:
         return (
-            f'{self.title}: годен до {self.expiration_date};'
-            + f'{self.quantity}/{self.capacity}.'
+            f'{self.title}(exp: {self.expiration_date}) - '
+            + f'{self.quantity}/{self.capacity}'
         )
 
     def assign_id(self, value) -> None:
@@ -110,8 +121,10 @@ class BaseMedicine(ABC):
         }
 
     @abstractmethod
-    def take(self):
+    def take_unit(self):
         """
         Принять лекарство.
         """
-        pass
+        raise NotImplementedError(
+            'В дочернем классе не реализован метод take().'
+        )
