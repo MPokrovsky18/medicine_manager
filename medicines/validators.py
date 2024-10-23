@@ -107,7 +107,7 @@ class MedicineValidator:
         return capacity
 
     @staticmethod
-    def validate_quantity(quantity: float) -> float:
+    def validate_current_quantity(quantity: float) -> float:
         """
         Проверка валидности quantity.
         """

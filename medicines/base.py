@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import date
+from datetime import date, datetime
 
 from medicines.validators import MedicineValidator as mv
 
@@ -14,12 +14,13 @@ class BaseMedicine(ABC):
         title: str,
         expiration_date: date,
         capacity: float,
+        current_quantity: float
     ) -> None:
         self.__id: int = 0
         self.title: str = title
         self.expiration_date: date = expiration_date
         self.capacity: float = capacity
-        self.quantity: float = capacity
+        self.current_quantity: float = current_quantity
 
     @property
     def id(self) -> int:
@@ -50,16 +51,16 @@ class BaseMedicine(ABC):
         self.__capacity = mv.validate_capacity(value)
 
     @property
-    def quantity(self) -> float:
-        return self.__quantity
+    def current_quantity(self) -> float:
+        return self.__current_quantity
 
-    @quantity.setter
-    def quantity(self, value) -> None:
-        self.__quantity = mv.validate_quantity(value)
+    @current_quantity.setter
+    def current_quantity(self, value) -> None:
+        self.__current_quantity = mv.validate_current_quantity(value)
 
     @property
     def is_empty(self) -> bool:
-        return self.quantity == 0
+        return self.current_quantity == 0
 
     @property
     def is_expired(self) -> bool:
@@ -71,8 +72,9 @@ class BaseMedicine(ABC):
 
     def __str__(self) -> str:
         return (
-            f'{self.title}(exp: {self.expiration_date}) - '
-            + f'{self.quantity}/{self.capacity}'
+            f'{self.title}(exp: '
+            + f'{datetime.strftime(self.expiration_date, '%d.%m.%Y')}) - '
+            + f'{self.current_quantity}/{self.capacity}'
         )
 
     def assign_id(self, value) -> None:
@@ -91,7 +93,7 @@ class BaseMedicine(ABC):
         title: str = None,
         expiration_date: date = None,
         capacity: float = None,
-        quantity: float = None
+        current_quantity: float = None
     ) -> None:
         """
         Обновить значения объекта.
@@ -105,8 +107,8 @@ class BaseMedicine(ABC):
         if capacity:
             self.capacity = capacity
 
-        if quantity:
-            self.quantity = quantity
+        if current_quantity:
+            self.current_quantity = current_quantity
 
     def to_dict(self) -> dict:
         """
@@ -114,10 +116,10 @@ class BaseMedicine(ABC):
         """
         return {
             'id': self.__id,
-            'title': self.__name,
+            'title': self.__title,
             'expiration_date': str(self.__expiration_date),
             'capacity': self.__capacity,
-            'quantity': self.__quantity,
+            'current_quantity': self.__current_quantity,
         }
 
     @abstractmethod

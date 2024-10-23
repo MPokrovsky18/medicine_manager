@@ -1,5 +1,15 @@
-from medicines.models import Medicine, MedicineStorage
+from datetime import date
+
+from medicines.base import BaseMedicine
+from medicines.factories import MedicineFactory
+from medicines.models import MedicineStorage, Pills, Drops
 from medicines.validators import MedicineValidator
+
+
+MEDICINES_ENUM = (
+    ('капли', Drops),
+    ('таблетки', Pills)
+)
 
 
 class MedicineManager:
@@ -7,18 +17,11 @@ class MedicineManager:
     Класс-менеджер для управления лекарствами.
     """
 
-    def __init__(self, medicines: list[Medicine] = None) -> None:
+    def __init__(self, medicines: list[BaseMedicine] = None) -> None:
         self.__medicine_storage: MedicineStorage = MedicineStorage()
 
         if medicines:
             self.__medicine_storage.add_multiple(medicines)
-
-    @property
-    def medicines(self):
-        """
-        Получить копию списка лекарств.
-        """
-        return self.__medicine_storage.get()
 
     @property
     def medicine_count(self) -> int:
@@ -27,67 +30,119 @@ class MedicineManager:
         """
         return self.__medicine_storage.count
 
-    def find_medicine(self, name: str) -> Medicine | None:
+    def get_medicines_by_filters(
+        self,
+        id: int | None = None,
+        type_index: int | None = None,
+        title: str | None = None,
+        expiration_date: date | None = None,
+        capacity: float | None = None,
+        current_quantity: float | None = None
+    ) -> list[BaseMedicine]:
         """
-        Получить объект из списка, если он существует.
+        Получить список лекарств по фильтру.
         """
-        target_name = MedicineValidator.validate_name(name)
+        passed_params = {}
 
-        for medicine in self.__medicine_storage.get():
-            if medicine.name == target_name:
-                return medicine
+        if id:
+            passed_params['id'] = id
 
-        return None
+        if type_index:
+            if type_index == 0:
+                target_type = Drops
+            elif type_index == 1:
+                target_type = Pills
 
-    def check_exist_medicine_or_rise(
-        self, name: str, exists: bool = True
-    ) -> Medicine | None:
-        """
-        Проверить объект на существование или отсутствие в списке.
-        """
-        medicine = self.find_medicine(name)
+            passed_params['target_type'] = target_type
 
-        if not medicine and exists:
-            raise ValueError(f'Объект с таким именем не найден: {name}')
+        if title:
+            passed_params['title'] = MedicineValidator.validate_title(title)
 
-        if medicine and not exists:
-            raise ValueError(f'Объект с таким именем уже существует: {name}')
+        if expiration_date:
+            passed_params['expiration_date'] = expiration_date
 
-        return medicine if exists else None
+        if capacity:
+            passed_params['capacity'] = capacity
 
-    def add_medicine(self, name: str) -> None:
+        if current_quantity:
+            passed_params['current_quantity'] = current_quantity
+
+        return self.__medicine_storage.get(**passed_params)
+
+    def add_medicine(
+        self,
+        medicine_type: int,
+        title: str,
+        expiration_date: date,
+        capacity: float,
+        current_quantity: float
+    ) -> None:
         """
         Добавить лекарство в список.
         """
-        self.check_exist_medicine_or_rise(name, exists=False)
-        self.__medicine_storage.add(Medicine(name))
+        if medicine_type == 0:
+            new_medicine = MedicineFactory.get_new_drops(
+                title=title,
+                expiration_date=expiration_date,
+                capacity=capacity,
+                current_quantity=current_quantity
+            )
+        elif medicine_type == 1:
+            new_medicine = MedicineFactory.get_new_pills(
+                title=title,
+                expiration_date=expiration_date,
+                capacity=capacity,
+                current_quantity=current_quantity
+            )
 
-    def remove_medicine(self, name: str) -> None:
+        self.__medicine_storage.add(new_medicine)
+
+    def remove_medicine(self, id: int) -> None:
         """
         Удалить лекарство из списка.
         """
-        target = self.check_exist_medicine_or_rise(name)
-        self.__medicine_storage.remove(target.id)
+        self.__medicine_storage.remove(id)
 
-    def edit_medicine(self, current_name: str, new_name: str) -> None:
+    def edit_medicine(
+        self,
+        id: int,
+        medicine_type: int | None = None,
+        title: str | None = None,
+        expiration_date: date | None = None,
+        capacity: float | None = None,
+        current_quantity: float | None = None
+    ) -> None:
         """
         Редактировать лекарство.
         """
-        medicine = self.check_exist_medicine_or_rise(current_name)
-        self.check_exist_medicine_or_rise(new_name, exists=False)
-        medicine.name = new_name
+        medicine = self.get_medicines_by_filters(id=id)
+
+        if medicine_type and not isinstance(
+            medicine, MEDICINES_ENUM[medicine_type][1]
+        ):
+            if medicine_type == 0:
+                new_medicine = MedicineFactory.get_new_drops(
+                    title=medicine.title,
+                    expiration_date=medicine.expiration_date,
+                    capacity=medicine.capacity,
+                    current_quantity=medicine.current_quantity
+                )
+            elif medicine_type == 1:
+                new_medicine = MedicineFactory.get_new_pills(
+                    title=medicine.title,
+                    expiration_date=medicine.expiration_date,
+                    capacity=medicine.capacity,
+                    current_quantity=medicine.current_quantity
+                )
+
+                new_medicine.assign_id(medicine.id)
+                medicine = new_medicine
+
+        medicine.update(
+            title=title,
+            expiration_date=expiration_date,
+            capacity=capacity,
+            current_quantity=current_quantity
+        )
+
         self.__medicine_storage.update(medicine)
-
-    def get_medicines_list(self) -> str:
-        """
-        Получить список лекарств.
-        """
-        medicines = self.__medicine_storage.get()
-
-        if medicines:
-            return '\n'.join(
-                f'{index+1}. {medicine.name}'
-                for index, medicine in enumerate(medicines)
-            )
-
-        return 'Список пуст!'
