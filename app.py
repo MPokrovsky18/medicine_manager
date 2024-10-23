@@ -1,5 +1,5 @@
 from config import JSON_FILE_PATH
-from console import ConsoleApp
+from console_ui.console_app import ConsoleApp
 from medicines.managers import MedicineManager
 from storage import JSONStorageManager
 
@@ -24,5 +24,5 @@ class MedicineApp:
         except Exception as e:
             print(e)
         finally:
-            self.__storage.save_data(self.__manager.medicines)
+            self.__storage.save_data(self.__manager.get_medicines_by_filters())
             print('Данные сохранены.')

@@ -26,7 +26,7 @@ class JSONStorageManager:
         """
         Загрузить данные из файла.
         """
-        if exists(self._file_path):    
+        if exists(self._file_path):
             with open(self._file_path, 'r', encoding='utf-8') as file:
                 json_data = json.load(file)
         else:
