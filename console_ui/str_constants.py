@@ -18,6 +18,6 @@ START_ADD_NEW_MEDICINE_TEXT = f'''Добавление нового лекарс
 
 ENUM_MEDICINE_TYPES = (
     '\n'.join(
-        f'{i} - {name}' for i, name in enumerate(MEDICINES_ENUM, 1)
+        f'{i} - {name[0]}' for i, name in enumerate(MEDICINES_ENUM, 1)
     )
 )

@@ -8,7 +8,7 @@ def get_valid_input_or_cancel(
     validation_method=None,
     error_message: str = None,
     can_empty_input: bool = False
-) -> str:
+) -> str | None:
     """
     Получить от пользователя корректные данные из консоли.
     """
@@ -18,9 +18,12 @@ def get_valid_input_or_cancel(
     while not is_valid_input:
         user_input = input(input_message + ' (или "q" для отмены): ')
 
-        if not can_empty_input and not user_input:
+        if can_empty_input and not user_input:
+            return None
+
+        if not user_input:
             print(SPLIT_LINE)
-            print('Ошибка. Строка не должна быть пустой.')
+            print('Строка не должна быть пустой.')
         elif user_input.lower() in ('q', 'й'):
             print(SPLIT_LINE)
             print('Операция прервана.')
@@ -57,9 +60,9 @@ def get_all_parameters_with_input_conditions():
         },
         'title': {
             'input_message': 'Введите название лекарства',
-            'validation_method': lambda x: len(x) >= 3,
+            'validation_method': lambda x: len(x) >= 3 and len(x) < 50,
             'error_message': (
-                'Длина названия может быть не менее 3-х символов '
+                'Длина названия должна быть не менее 3-х символов '
                 + 'и не более 50-ти.'
             ),
         },
@@ -112,7 +115,8 @@ def gather_required_params(default_can_empty_input=False, *params_names):
             if user_input == 'q':
                 return None
 
-            params_keys_values[arg_name] = user_input
+            if user_input:
+                params_keys_values[arg_name] = user_input
 
     return params_keys_values
 
@@ -121,7 +125,7 @@ def execute_action_if_confirmed(
     method: callable, question: str, *args, **kwargs
 ) -> None:
     """
-    Выполнить метод, если пользователь подтвердил ввод.
+    Выполнить метод, если пользователь подтвердил.
     """
     user_input = input(question + '(y/n)(д/н): ').lower()
 
