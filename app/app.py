@@ -1,7 +1,7 @@
-from config import JSON_FILE_PATH
+from app.config import JSON_FILE_PATH
 from console_ui.console_app import ConsoleApp
 from medicines.managers import MedicineManager
-from storage import JSONStorageManager
+from app.storage import JSONStorageManager
 
 
 class MedicineApp:

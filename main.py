@@ -1,4 +1,4 @@
-from app import MedicineApp
+from app.app import MedicineApp
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from config import APP_NAME
+from app.config import APP_NAME
 from medicines.managers import MEDICINES_ENUM
 
 
